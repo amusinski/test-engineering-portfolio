@@ -106,4 +106,16 @@ This agent enforces **clarity, traceability, and testability** before test execu
 - Quality Engineers
 - Technical Product Owners
 - Engineering Managers reviewing test readiness
-``
+
+
+# Downstream Artifacts
+
+The output of this agent is intended to be used as input for:
+
+- Manual test case design
+- Automation candidate selection
+- Playwright test implementation
+- Requirements Traceability Matrices (RTMs)
+
+Test cases derived from this agent’s output live in the `/test-cases` directory.
+
