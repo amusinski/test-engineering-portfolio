@@ -1,0 +1,101 @@
+# Case Study: 6688 – Prevent Invalid Database Query Exceptions from Being Reported During Report Generation
+
+## Context
+
+This case study analyzes a production defect where **invalid report configuration properties**
+(e.g., spaces, special characters, or unexpected field names) caused **database query exceptions**
+during report generation.
+
+Although the system already displayed an error to the user and prevented report download,
+these **expected, user-caused errors were also being reported to the monitoring system**,
+creating unnecessary alert noise.
+
+---
+
+## Agent Used
+
+**Jira Requirements Review Agent**  
+See: `/agents/jira-requirements-review-agent.md`
+
+---
+
+## Source Material
+
+- Jira Ticket PDF: **6688**
+- Jira sections reviewed:
+  - Summary / Description
+  - Business Impact
+  - Actual Behavior
+  - Expected Behavior
+  - Steps to Reproduce
+  - Comments clarifying intent
+
+The Jira PDF was treated as the **single source of truth**.
+
+---
+
+## Analysis Approach
+
+The agent was used to:
+- Separate **user-facing error behavior** from **observability behavior**
+- Identify requirements related specifically to monitoring suppression
+- Preserve existing functional behavior
+- Extract constraints preventing exception suppression
+- Surface ambiguity around exception filtering rules
+
+No test cases or automation artifacts were generated at this stage.
+
+---
+
+## Primary Artifact Produced
+
+The downstream artifact from this analysis is a **QA-ready Requirements Table**, including:
+
+- Functional Requirements (existing user-facing behavior preserved)
+- Non-Functional Requirements (monitoring and observability behavior)
+- Constraints (exceptions must still occur internally)
+- Open Questions (scope of exception filtering)
+- Testability notes and automation candidacy indicators
+
+📄 Resulting requirements artifact:
+- `/requirements/6688-requirements.md`
+
+---
+
+## Key Findings
+
+- Invalid or unexpected report properties can generate invalid database queries.
+- These errors are already correctly surfaced to users, and report generation is blocked.
+- The ticket explicitly requires that these exceptions **must not be reported to the monitoring system**.
+- The exception itself must **not** be suppressed; background processing should still fail as expected.
+- Clarifying comments confirm that **monitoring suppression is the only intended change**.
+
+---
+
+## Risks Identified
+
+- Overly broad filtering could suppress legitimate system defects.
+- Overly narrow filtering could fail to reduce monitoring noise.
+- The ticket does not define explicit exception signatures or filtering criteria.
+- Validation relies on the **absence of monitoring events**, which is time-bound and environment-dependent.
+
+---
+
+## Why This Case Matters
+
+This case demonstrates a critical quality distinction:
+
+> **Not all errors are bugs, but not all errors belong in monitoring alerts.**
+
+By separating **functional correctness** from **observability requirements**, this analysis prevents
+QA from conflating expected user errors with system instability.
+
+---
+
+## Next Steps (Out of Scope for This Agent)
+
+- Generate test cases using a Test Case Generation Agent
+- Define explicit exception classification rules
+- Validate monitoring suppression without masking true system failures
+
+These steps are intentionally handled by separate agents and workflows.
