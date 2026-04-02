@@ -1,0 +1,104 @@
+# Case Study: 6769 – Prevent Early Process Termination from Unexpected API Response Data
+
+## Context
+
+This case study analyzes a production defect where an **external API dependency returned unexpected, non‑JSON data** during a multi‑step invoice generation workflow.
+
+The system assumed JSON responses and attempted to parse the payload unconditionally, resulting in a runtime parsing error and **premature termination of the process**. This caused partially completed work to be left in an inconsistent state and required manual intervention.
+
+---
+
+## Agent Used
+
+**Jira Requirements Review Agent**  
+See: `/agents/jira-requirements-review-agent.md`
+
+---
+
+## Source Material
+
+- Jira Ticket PDF: **6769**
+- Jira sections reviewed:
+  - Summary / Description
+  - Business Impact
+  - Actual Behavior
+  - Expected Behavior
+  - Steps to Reproduce
+  - Developer Notes
+
+The Jira PDF was treated as the **single source of truth**.
+
+---
+
+## Analysis Approach
+
+The agent was used to:
+- Extract requirements related to **error handling and process resilience**
+- Identify implicit assumptions about third‑party API response formats
+- Separate functional workflow expectations from robustness requirements
+- Surface ambiguity around failure recovery and batch state consistency
+- Preserve existing business workflow intent while isolating failure points
+
+No test cases or automation artifacts were generated at this stage.
+
+---
+
+## Primary Artifact Produced
+
+The downstream artifact from this analysis is a **QA‑ready Requirements Table**, including:
+
+- Functional Requirements (process continuity expectations)
+- Non‑Functional Requirements (resilience to malformed external data)
+- Constraints (external API behavior cannot be controlled)
+- Open Questions (expected fallback behavior and recovery rules)
+- Testability notes and automation candidacy indicators
+
+📄 Resulting requirements artifact:
+- `/requirements/6769-requirements.md`
+
+---
+
+## Key Findings
+
+- The workflow depends on a **multi‑step external API process**.
+- At least one step returned **non‑JSON data** unexpectedly.
+- The system attempted to parse the response as JSON without validation.
+- A parsing error caused the workflow to terminate early.
+- Partial progress was committed, leaving the batch in an inconsistent state.
+- Manual remediation was required to restore process integrity.
+
+---
+
+## Risks Identified
+
+- External dependencies may return malformed or unexpected data at any time.
+- Unhandled parsing errors can halt long‑running workflows.
+- Partial success without user visibility increases operational risk.
+- Lack of explicit fallback behavior makes deterministic testing difficult.
+- QA cannot validate correctness without defined recovery expectations.
+
+---
+
+## Why This Case Matters
+
+This case demonstrates a common reliability failure mode:
+
+> **Assuming well‑formed data from external systems leads to brittle workflows.**
+
+The ticket focuses on **preventing early exits**, not on changing business logic.  
+The agent ensures QA distinguishes between:
+- Expected workflow failures that should be handled gracefully
+- True system defects that should halt processing
+
+By enforcing this separation, the analysis prevents fragile integrations from becoming production incidents.
+
+---
+
+## Next Steps (Out of Scope for This Agent)
+
+- Generate test cases using a Test Case Generation Agent
+- Define expected fallback behavior for malformed API responses
+- Introduce deterministic recovery and retry rules
+- Validate batch state consistency after partial failures
+
+These steps are intentionally handled by separate agents and workflows.
