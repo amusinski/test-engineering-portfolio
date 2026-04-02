@@ -1,0 +1,94 @@
+name: Playwright Tests
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "playwright/**"
+  pull_request:
+    branches: [main]
+    paths:
+      - "playwright/**"
+
+defaults:
+  run:
+    working-directory: playwright
+
+jobs:
+  smoke:
+    name: Smoke Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -e ".[dev]"
+
+      - name: Install Playwright browsers
+        run: playwright install --with-deps chromium
+
+      - name: Run smoke tests
+        run: pytest tests/ -m smoke -v
+        env:
+          BASE_URL: ${{ vars.BASE_URL || 'http://localhost:3000' }}
+          TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
+          TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
+
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-report
+          path: playwright/playwright-report/
+          retention-days: 7
+
+  regression:
+    name: Regression Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    needs: smoke
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox, webkit]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -e ".[dev]"
+
+      - name: Install Playwright browsers
+        run: playwright install --with-deps ${{ matrix.browser }}
+
+      - name: Run regression tests
+        run: pytest tests/ -m regression -v --browser ${{ matrix.browser }}
+        env:
+          BASE_URL: ${{ vars.BASE_URL || 'http://localhost:3000' }}
+          TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
+          TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
+
+      - name: Upload test artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: regression-failures-${{ matrix.browser }}
+          path: |
+            playwright/playwright-report/
+            playwright/test-results/
+          retention-days: 14
