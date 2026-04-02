@@ -108,14 +108,22 @@ This agent enforces **clarity, traceability, and testability** before test execu
 - Engineering Managers reviewing test readiness
 
 
-# Downstream Artifacts
+## Downstream Artifacts
 
-The output of this agent is intended to be used as input for:
+The primary downstream artifact produced by this agent is a **QA‑ready Requirements Table**, intended to be consumed by other QA workflows and agents.
 
-- Manual test case design
-- Automation candidate selection
-- Playwright test implementation
+This includes:
+- Functional Requirements
+- Non‑Functional Requirements
+- Constraints
+- Open Questions / Assumptions
+- Testability assessments
+- Automation candidacy signals (informational only)
+
+This agent does **not** generate test cases or automation code.
+
+Its output is designed to serve as structured input for:
+- Test Case Generation agents
+- QA review and sign‑off
 - Requirements Traceability Matrices (RTMs)
-
-Test cases derived from this agent’s output live in the `/test-cases` directory.
-
+- Risk and ambiguity discussions prior to QA/UAT
