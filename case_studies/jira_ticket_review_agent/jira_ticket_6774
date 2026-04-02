@@ -1,0 +1,99 @@
+# Case Study: 6774 – Date Parsing Failure in Payment Upload
+
+## Context
+
+This case study documents the analysis of a production Jira defect where a **Payment Upload workflow failed with a user-visible 500 error** when date values were provided as Excel serial numbers.
+
+The Jira ticket lacked explicit acceptance criteria for handling numeric date formats and exposed ambiguity around expected user-visible behavior.
+
+---
+
+## Agent Used
+
+**Jira Requirements Review Agent**  
+See: `/agents/jira-requirements-review-agent.md`
+
+---
+
+## Source Material
+
+- Jira Ticket PDF: 6774
+- Sections reviewed:
+  - Summary / Description
+  - Business Impact
+  - Actual Behavior
+  - Expected Behavior
+  - Steps to Reproduce
+  - Root Cause / Solution
+
+The Jira PDF was treated as the **single source of truth**.
+
+---
+
+## Analysis Approach
+
+The agent was used to:
+- Extract explicit and implicit requirements
+- Separate functional vs non-functional concerns
+- Identify constraints and error-handling expectations
+- Flag ambiguity instead of resolving it
+- Assess testability and automation candidacy at a requirements level
+
+No test cases or automation were generated at this stage.
+
+---
+
+## Primary Artifact Produced
+
+The downstream artifact from this analysis is a **QA-ready Requirements Table**, including:
+
+- Functional Requirements
+- Non-Functional Requirements
+- Constraints
+- Open Questions
+- Testability notes
+- Automation candidacy indicators
+
+📄 Resulting requirements artifact:
+- `/requirements/iris-6774-requirements.md`
+
+---
+
+## Key Findings
+
+- Excel serial date values were not supported by existing date parsing logic.
+- The system partially succeeded in the background but failed at the UI layer.
+- Missing acceptance criteria existed for:
+  - Numeric date handling
+  - User-visible error behavior
+  - Detail page rendering guarantees
+- Observability gaps caused a user-facing failure to surface as a generic 500 error.
+
+---
+
+## Risks Identified
+
+- Users receive no confirmation despite partial success.
+- Payment Upload Detail pages become permanently inaccessible.
+- QA cannot deterministically validate behavior without clarified acceptance criteria.
+
+---
+
+## Why This Case Matters
+
+This case demonstrates how **unclear requirements**, not just faulty code, can lead to:
+- User-visible production errors
+- Support escalations
+- Data integrity uncertainty
+
+The agent helps prevent these issues by enforcing **testability and clarity before QA execution**.
+
+---
+
+## Next Steps (Out of Scope for This Agent)
+
+- Generate test cases using a Test Case Generation Agent
+- Select deterministic scenarios for Playwright automation
+- Validate Excel serial date conversion logic
+
+These steps are intentionally handled by separate agents.
