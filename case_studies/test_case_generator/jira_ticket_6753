@@ -1,0 +1,72 @@
+# Test Case Set — 6753 — Subclaim Snapshot JSON Field Creation
+
+## Metadata
+- Case ID: 6753
+- Source Artifact: Jira Story 6753 — Create subclaim snapshot JSON fields for IPRs
+- Agent Used: Test Case Generator
+- Test Author: Adam Musinski
+- Date Created: 2026-03-23
+- Scope: Validation of creation, visibility, immutability, and update behavior of the subclaim snapshot JSON field on IPRs via front-end actions and the Django Admin IPR Detail View.
+- Out of Scope: Backfill of historical IPR data. Performance improvements. Use of snapshot data for calculations. Follow-on tickets addressing backfill and calculation usage.
+
+---
+## Objective
+Validate that the system consistently creates, displays, protects, and updates a subclaim snapshot JSON field on IPRs in response to defined front-end events, and that the snapshot data observable in the Django Admin IPR Detail View accurately reflects the most recent triggering action.
+
+---
+## Preconditions
+- System is deployed to a testable environment.
+- Monitoring and observability tooling is enabled.
+- Internal users authenticate via SSO.
+- User has permitted access to the Django Admin IPR Detail View.
+- Front-end workflows for generating IPRs and modifying subclaims are available.
+
+---
+## Assumptions & Constraints
+- Snapshot creation is triggered only by the front-end events explicitly defined in the acceptance criteria.
+- Functional behavior outside snapshot creation and storage is unchanged.
+- Snapshot data structure and internal calculations are not validated, only observable presence and overwrite behavior.
+
+---
+## Acceptance Criteria (Derived)
+| AC ID | Description |
+|-----|-------------|
+| AC-1 | A new subclaim snapshot JSON field exists on all IPRs. |
+| AC-2 | The snapshot JSON field is visible on the Django Admin IPR Detail View and is read-only for all users, including superusers. |
+| AC-3 | A snapshot of subclaim data is saved when specific front-end events occur. |
+| AC-4 | New snapshot data overwrites any existing snapshot data on the IPR. |
+
+---
+## Manual Test Cases
+| Test Case ID | Title | Type | Preconditions | Steps | Expected Result |
+|------------|-------|------|---------------|-------|-----------------|
+| 6753-TC-001 | Snapshot field exists on IPR | Functional | Internal SSO user has access to Django Admin IPR Detail View. At least one IPR exists. | 1. Navigate to an existing IPR in Django Admin.<br>2. Scroll through available fields.<br>3. Locate the subclaim snapshot JSON field. | The subclaim snapshot JSON field is present and visible on the IPR detail view. |
+| 6753-TC-002 | Snapshot field is read-only | Functional | Internal SSO user has access to Django Admin IPR Detail View. IPR has snapshot data. | 1. Open an existing IPR in Django Admin.<br>2. Attempt to edit the snapshot JSON field.<br>3. Attempt to save the IPR. | The snapshot JSON field does not allow editing. No changes are saved. |
+| 6753-TC-003 | Snapshot field is read-only for superuser | Negative | Internal superuser has access to Django Admin IPR Detail View. IPR has snapshot data. | 1. Open an existing IPR as superuser.<br>2. Attempt to modify snapshot JSON field.<br>3. Save the IPR. | The snapshot JSON field remains unchanged and read-only for superuser. |
+| 6753-TC-004 | Snapshot created on IPR generation | Functional | User can generate IPRs via front end. | 1. Generate a new IPR via front end.<br>2. Open the IPR in Django Admin.<br>3. View snapshot JSON field. | Snapshot JSON field is populated with subclaim data from the generation event. |
+| 6753-TC-005 | Snapshot updated when subclaims are removed | Functional | IPR exists with subclaims and snapshot data. | 1. Remove one or more subclaims via front end.<br>2. Open IPR in Django Admin.<br>3. View snapshot JSON field. | Snapshot JSON reflects subclaim removal. |
+| 6753-TC-006 | Snapshot updated when subclaims moved to Submitted | Functional | IPR exists with subclaims not in Submitted state. | 1. Move subclaims to Submitted via front end.<br>2. Open IPR in Django Admin.<br>3. View snapshot JSON field. | Snapshot JSON reflects Submitted state. |
+| 6753-TC-007 | Snapshot updated when subclaims moved to Unsubmitted | Functional | IPR exists with subclaims in Submitted state. | 1. Move subclaims to Unsubmitted via front end.<br>2. Open IPR in Django Admin.<br>3. View snapshot JSON field. | Snapshot JSON reflects Unsubmitted state. |
+| 6753-TC-008 | Snapshot overwrites existing data | Edge Case | IPR exists with existing snapshot data. | 1. Record current snapshot JSON value.<br>2. Trigger a snapshot-generating front-end action.<br>3. Refresh IPR in Django Admin. | Snapshot JSON contains new data and previous snapshot data is fully overwritten. |
+
+---
+## Observability Validation Notes
+- No new error or warning alerts are generated during snapshot creation or overwrite.
+- No timeout or recalculation-related error events occur.
+- Only expected informational logs are present for snapshot save events.
+
+---
+## Risks & Edge Considerations
+- Snapshot may not trigger if front-end events are bypassed.
+- Partial snapshot overwrite could lead to stale data if not fully replaced.
+- Environment latency could delay visibility of updated snapshot data.
+
+---
+## Traceability
+- Source Requirement: Jira Story 6753 Acceptance Criteria
+- Related Analysis Artifact: Related investigation ticket referenced by the story
+- Related Agent Output: Manual Test Cases — 6753
+
+---
+## Notes
+This test set validates the initial delivery of the subclaim snapshot field. Subsequent tickets must be tested separately for historical backfill and calculation usage behavior.
