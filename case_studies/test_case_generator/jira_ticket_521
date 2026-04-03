@@ -1,0 +1,99 @@
+# Test Case Set — 521 — Remove Live Cancel/Update Buttons From Company Profile View
+
+## Metadata
+- Case ID: 521  
+- Source Artifact: Jira Ticket 521 PDF — “Remove Live Cancel/Update Buttons From The Lower Right Corner Of The Company Profile Page View”  
+- Agent Used: Test Case Generator  
+- Test Author: Adam Musinski  
+- Date Created: 2026-03-23  
+- Scope: Company Profile page View and Edit modes, Cancel and Update button visibility, behavior, validation, data persistence, and role-based access.  
+- Out of Scope: Backend data model changes, database integrity beyond UI-observable persistence, performance testing, and cross-browser UI styling differences not described in the ticket.
+
+---
+
+## Objective
+
+Validate that the Company Profile page enforces correct UI behavior between View and Edit modes by ensuring Cancel and Update actions are only available in Edit mode, do not cause unintended data loss, trigger validation correctly, and preserve saved data. Validation focuses exclusively on observable UI behavior and user-facing outcomes.
+
+---
+
+## Preconditions
+
+- System is deployed to a testable environment.
+- Monitoring/observability tooling is enabled.
+- User has access to the Company Profile feature with role-appropriate permissions.
+
+---
+
+## Assumptions & Constraints
+
+- Users may trigger validation errors through invalid input, but no action should erase existing data.
+- Functional behavior must match documented acceptance criteria only.
+- Observability signals may lag behind UI behavior and are not user-visible.
+
+---
+
+## Acceptance Criteria (Derived)
+
+| AC ID | Description |
+|-----|-------------|
+| AC-01 | Cancel and Update buttons are hidden and inaccessible in View mode. |
+| AC-02 | Cancel and Update buttons are visible and enabled only in Edit mode. |
+| AC-03 | No Update action can be triggered while in View mode. |
+| AC-04 | Entering Edit mode preserves existing Company Profile data. |
+| AC-05 | Clicking Update does not clear populated fields. |
+| AC-06 | Validation does not show errors or erase data when inputs are valid. |
+| AC-07 | Validation errors appear only for invalid or missing fields and do not erase other data. |
+| AC-08 | Data persists after a successful Update. |
+| AC-09 | Cancel discards unsaved changes and restores last saved data. |
+| AC-10 | Users without edit rights cannot access Edit, Cancel, or Update actions. |
+| AC-11 | Authorized roles can edit and save without data loss. |
+| AC-12 | Cancel and Update buttons appear in a consistent location without duplication. |
+
+---
+
+## Manual Test Cases
+
+| Test Case ID | Title | Type | Preconditions | Steps | Expected Result |
+|------------|-------|------|---------------|-------|-----------------|
+| 521-TC-001 | Hide Cancel/Update buttons in View mode | Functional | User has edit permissions. Company Profile page contains saved data. | 1. Log in as an authorized user.<br>2. Open the Company Profile page in View mode.<br>3. Inspect the page for Cancel or Update controls using mouse, keyboard, and assistive navigation. | Cancel and Update buttons are not visible or accessible. No Update action can be triggered. |
+| 521-TC-002 | Show Cancel/Update buttons in Edit mode | Functional | User has edit permissions. | 1. Open the Company Profile page.<br>2. Enter Edit mode using the Edit control.<br>3. Observe the lower right action area. | Cancel and Update buttons are visible, enabled, and clickable. |
+| 521-TC-003 | Preserve data when entering Edit mode | Functional | Company Profile has existing populated data. | 1. Open the Company Profile page in View mode.<br>2. Enter Edit mode.<br>3. Review all form fields. | All fields are pre-populated with existing saved data. |
+| 521-TC-004 | Update does not clear populated fields | Functional | User is in Edit mode with valid data in all fields. | 1. Verify all fields contain valid values.<br>2. Click Update.<br>3. Observe field values immediately after the click. | No fields are cleared or blanked at the time of Update initiation. |
+| 521-TC-005 | Validation with valid data | Functional | User is in Edit mode with valid required fields. | 1. Confirm required fields are valid.<br>2. Click Update.<br>3. Observe validation behavior. | No validation errors are displayed. Field values remain intact. |
+| 521-TC-006 | Validation with invalid or missing data | Negative | User is in Edit mode. | 1. Clear or invalidate a required field.<br>2. Click Update.<br>3. Observe validation messages and field values. | Errors appear only for invalid fields. All other fields retain values. |
+| 521-TC-007 | Data persists after successful Update | Functional | User is in Edit mode with modified valid data. | 1. Modify one or more fields.<br>2. Click Update.<br>3. Return to View mode if applicable. | Updated values are saved and displayed correctly. |
+| 521-TC-008 | Cancel discards unsaved changes | Functional | User is in Edit mode with existing saved data. | 1. Modify one or more fields.<br>2. Click Cancel.<br>3. Observe the Company Profile page. | Unsaved changes are discarded and last saved values are shown. |
+| 521-TC-009 | No edit access for unauthorized users | Negative | User lacks edit permissions. | 1. Log in as a non-edit user.<br>2. Open the Company Profile page.<br>3. Inspect for Edit, Cancel, or Update controls. | User cannot enter Edit mode and sees no Cancel or Update controls. |
+| 521-TC-010 | Authorized roles edit without data loss | Regression | User is SysAdmin, Operator, Trade Ally Manager, or assigned Contractor. | 1. Enter Edit mode.<br>2. Modify data.<br>3. Click Update. | Data is saved successfully with no fields wiped. |
+| 521-TC-011 | Button placement consistency | Regression | User has edit permissions. | 1. Toggle between View and Edit modes.<br>2. Observe button placement each time. | Cancel and Update buttons appear in a consistent location with no duplicates. |
+
+---
+
+## Observability Validation Notes
+
+- Confirm absence of client-side error alerts when entering Edit mode or clicking Update with valid data.
+- Confirm no unexpected error events are logged during Update or Cancel actions.
+- Only informational or expected validation-related logs are present.
+
+---
+
+## Risks & Edge Considerations
+
+- Risk that hidden Update actions remain accessible via non-visual means.
+- Risk that validation logic clears fields under edge conditions.
+- Possible environment-specific delays in reflecting saved data.
+
+---
+
+## Traceability
+
+- Source Requirement: Jira 521 Acceptance Criteria AC-01 through AC-12  
+- Related Analysis Artifact: Jira 521 Description and Steps to Reproduce  
+- Related Agent Output: Generated Manual Test Cases for 521  
+
+---
+
+## Notes
+
+This test set intentionally avoids backend assumptions and validates only observable UI behavior to prevent regression of data loss and unintended Update access.
