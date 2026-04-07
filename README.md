@@ -11,6 +11,9 @@ This repository includes reusable QA and SDET agents that formalize how I approa
 - **[Test Case Generator](agents/test_case_generator.md)**  
   Transforms Jira tickets / acceptance criteria into clear, traceable, manually executable test cases.
 
+- **[Test Case Reviewer](agents/test_case_review)**
+Reviews generated manual test cases for completeness, traceability to acceptance criteria, and gaps/ambiguities before execution or QA sign‑off.
+
 
 ## Agent Case Studies
 
