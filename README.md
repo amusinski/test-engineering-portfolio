@@ -21,7 +21,7 @@ Reviews generated manual test cases for completeness, traceability to acceptance
 
 These artifacts show how I extract QA-ready requirements, risks, constraints, and open questions from Jira tickets—emphasizing testability and observability.
 
-- - **[Jira Ticket 6688 — Monitoring Noise Suppression for Invalid Report Properties.md](case_studies/jira_ticket_review_agent/jira_ticket_6688.md)**
+- **[Jira Ticket 6688 — Monitoring Noise Suppression for Invalid Report Properties.md](https://github.com/amusinski/test-engineering-portfolio/blob/main/case_studies/jira_ticket_review_agent/jira_ticket_6688)**
   Separates expected user-caused errors from monitoring behavior to reduce alert noise without changing functional outcomes.
 
 - **[Jira Ticket 6769 — Resilience to Malformed / Non‑JSON External API Responses.md](case_studies/case_studies/jira_ticket_review_agent/jira_ticket_6769.md)**  
