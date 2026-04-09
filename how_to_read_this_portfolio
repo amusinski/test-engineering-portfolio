@@ -1,0 +1,74 @@
+# How to Read This Portfolio
+
+This portfolio is intentionally *not* organized around tools alone.
+
+Instead, it is organized to show **how I think about quality**, how I recognize
+risk early, and how I translate ambiguous requirements into testable contracts
+and enforceable checks.
+
+If you are reviewing this portfolio, here is how to navigate it effectively.
+
+---
+
+## Start with the agents
+
+Begin in the `agents/` directory.
+
+These agents represent repeatable mental models I use as a QE/SDET to:
+
+- analyze Jira tickets for ambiguity
+- identify missing requirements
+- surface non‑functional risk
+- assess observability and automation feasibility
+
+They are designed to answer questions like:
+- *What can break here?*
+- *How would we detect it if it does?*
+- *What must be true for this to be testable at all?*
+
+---
+
+## Read the case studies next
+
+The case studies show the agents applied to **real tickets**, not synthetic examples.
+
+Focus on:
+- assumptions that were challenged
+- requirements that were missing or implicit
+- risks that were not obvious from acceptance criteria alone
+
+These artifacts demonstrate how quality work can reduce downstream rework by
+clarifying expectations early.
+
+---
+
+## Review automation patterns last
+
+Automation examples in this portfolio are intentionally:
+- contract‑focused
+- selective about strict assertions
+- aligned to CI‑friendly execution
+
+If something is *observed instead of asserted*, that choice is deliberate and
+documented. The goal is reliability and signal, not brittle coverage.
+
+---
+
+## What this portfolio is not
+
+This is **not**:
+- a framework showcase
+- a tutorial repository
+- a collection of “happy path” tests
+
+This is a demonstration of how I approach **test engineering as a design
+discipline**, not a post‑hoc activity.
+
+---
+
+## Intended audience
+
+This portfolio is most relevant for:
+- Senior QA / QE roles
+- SDET roles embedded in delivery teams
+- Software engineers who care deeply about reliability and correctness
