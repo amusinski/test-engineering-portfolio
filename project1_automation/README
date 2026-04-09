@@ -1,0 +1,49 @@
+# Enterprise Dashboard Automation (Portfolio)
+
+A Python-based test automation project focused on validating dashboard behavior,
+record workflows, and data exports in a modern web application.
+
+This repository is intentionally designed as a **portfolio example** showcasing
+UI and API test automation using **pytest** and **Playwright**, with organized
+test suites and reusable helper utilities.
+
+> **Note**  
+> Product names, UI labels, workflows, and helpers have been anonymized to remove
+> proprietary or sensitive details while preserving real-world testing patterns.
+
+---
+
+## Overview
+
+The project demonstrates automation coverage across multiple functional areas:
+
+### Dashboard validation
+- Default dashboard layout
+- Summary metric widgets
+- Entity-level cards
+- Section/widget visibility and consistency
+
+### Record workflow validation
+- Default and advanced filters
+- Record list behavior
+- Record detail navigation
+- Status-based workflows (e.g., dismiss / restore actions)
+
+### Analytics / performance validation
+- Landing behavior
+- Default field values
+- Page-level expectations
+
+### API / export validation
+- Export header structure
+- Data-driven validation scenarios
+- UI-to-export consistency checks
+
+---
+
+## Tech stack
+
+- Python 3.12
+- pytest
+- Playwright
+- Allure-compatible reporting
