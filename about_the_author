@@ -1,0 +1,26 @@
+# Adam Musinski — Test Engineering Portfolio
+
+I’m a Quality Engineer / SDET focused on designing reliability into systems
+through clear requirements, early risk identification, and purposeful automation.
+
+My work emphasizes:
+- turning ambiguity into testable contracts
+- preventing production issues by reasoning about failure modes
+- building automation that provides signal, not noise
+
+This portfolio demonstrates how I approach quality across the lifecycle—from
+requirements review, through test design, to CI‑friendly automation.
+
+---
+
+## What you’ll find here
+
+- **Test agents** that formalize how I analyze tickets and uncover gaps
+- **Case studies** showing real failure scenarios and how they were addressed
+- **Automation examples** that emphasize contract validation and observability
+
+All names and product details have been anonymized. The patterns and thinking are
+real.
+
+👉 **If you’re reviewing this portfolio**, start with  
+HOW_TO_READ_THIS_PORTFOLIO.md
