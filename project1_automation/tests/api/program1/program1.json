@@ -1,0 +1,20 @@
+{
+  "cases": [
+    {
+      "name": "example_case_1",
+      "expected_headers": [
+        "Header A",
+        "Header B",
+        "Header C"
+      ]
+    },
+    {
+      "name": "example_case_2",
+      "expected_headers": [
+        "Header A",
+        "Header D",
+        "Header E"
+      ]
+    }
+  ]
+}
