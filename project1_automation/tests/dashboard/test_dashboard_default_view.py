@@ -5,6 +5,7 @@ from utils.logging import get_logger
 
 log = get_logger("[Dashboard Default View]")
 
+
 def test_dashboard_default_view(page) -> None:
     """
     Validate the default dashboard view renders correctly.
