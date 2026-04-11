@@ -4,6 +4,7 @@ from utils.logging import get_logger
 
 log = get_logger("[Dashboard Metric Widget Validation]")
 
+
 def test_dashboard_dismissed_items_last_30_days(page):
     """
     Validate the 'Dismissed Items (Last 30 Days)' metric on a dashboard card.
