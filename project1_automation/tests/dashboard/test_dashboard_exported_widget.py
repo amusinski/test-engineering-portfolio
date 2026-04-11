@@ -4,6 +4,7 @@ from utils.logging import get_logger
 
 log = get_logger("[Dashboard Exported Items Metric]")
 
+
 def test_dashboard_exported_items_last_30_days(page):
     """
     Validate the 'Exported Items (Last 30 Days)' metric on a dashboard card.
