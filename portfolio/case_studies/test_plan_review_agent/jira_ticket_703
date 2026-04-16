@@ -1,0 +1,85 @@
+# Test Case Set — IC‑703 — Registration Security Logging & Rate Limiting
+
+## Metadata
+- **Case ID:** IC‑703  
+- **Source Artifact:** Jira Ticket IC‑703 — Add Security Logging (including IP Lockout monitoring) and Rate Limiting to Registration Flow  
+- **Agent Used:** Test Case Generator  
+- **Test Author:** Adam Musinski  
+- **Date Created:** 2026‑04‑14  
+- **Scope:** Validation of rate limiting behavior and security event logging for the self‑registration Verify and Create Account flows, 
+  including lockout enforcement, successful and failed events, and system error logging, as observable via Django Admin.  
+
+- **Out of Scope:** Log retention policies, SIEM alerting behavior, email notifications, performance testing, and abuse detection tuning 
+  beyond defined rate‑limit thresholds.
+
+---
+
+## Objective
+Validate that the registration flow enforces IP‑based rate limiting as defined, and that **all registration‑related interactions**—successful, 
+failed, blocked, and error scenarios—are logged with complete and accurate metadata, providing sufficient auditability and troubleshooting visibility.
+
+---
+
+## Preconditions
+- Application is deployed to a QA‑accessible environment.
+- Registration Verify and Create Account endpoints are available.
+- Rate limiting is enabled for both endpoints.
+- Logging pipeline is active and logs are visible via Django Admin.
+- Tester has SysAdmin access to Django Admin.
+- Test IP address can be reused to trigger rate limits.
+- Valid and invalid invoice and account data are available.
+
+---
+
+## Assumptions & Constraints
+- Rate limits are enforced per IP address, per endpoint, per hour as defined in the Jira requirements.
+- Lockout behavior uses a **single LOCKOUT event type** for both threshold‑reached and subsequent blocked attempts.
+- Logs are evaluated only for presence and correctness of required fields, not for downstream processing or alerting.
+- Time‑based behavior (1‑hour lockout window) is validated functionally, not by waiting full real‑time duration unless tooling allows.
+
+---
+
+## Acceptance Criteria (Derived)
+| AC ID | Description |
+|-----|-------------|
+| AC‑1 | Verify endpoint enforces a 5‑attempts‑per‑hour IP‑based rate limit with a 1‑hour lockout. |
+| AC‑2 | Create Account endpoint enforces a 3‑attempts‑per‑hour IP‑based rate limit with a 1‑hour lockout. |
+| AC‑3 | Every registration interaction is logged with required metadata, including timestamp (UTC), event type, IP address, field inputs, and additional log elements. |
+
+---
+
+## Manual Test Cases
+| Test Case ID | Title | Type | Preconditions | Steps | Expected Result |
+|-------------|-------|------|---------------|-------|-----------------|
+| IC‑703‑TC‑001 | Verify rate limit and logging on Verify page | Functional | SysAdmin access. Verify page accessible. | Submit Verify requests until limit is exceeded, then submit during lockout; inspect logs. | User is blocked after 5 attempts for 1 hour. Every submission generates a log entry. LOCKOUT event type is recorded for threshold and blocked attempts. Invoice fields and all additional log elements are present. |
+| IC‑703‑TC‑002 | Verify rate limit and logging on Create Account page | Functional | SysAdmin access. Successful verification completed. | Submit Create Account requests until limit is exceeded, then submit during lockout; inspect logs. | User is blocked after 3 attempts for 1 hour. Every submission generates a log entry. LOCKOUT event type is recorded. Invoice and account fields and all additional log elements are present. |
+| IC‑703‑TC‑003 | Verify detailed logging for successful verification | Functional | Valid invoice data available. | Submit valid verification and inspect logs. | VERIFY_SUCCESS event logged with UTC timestamp, IP address, invoice inputs, and all additional log elements. |
+| IC‑703‑TC‑004 | Verify logging for failed verification including field‑level validation | Negative | Invalid invoice data available. | Submit invalid verification and inspect logs. | Verification failure or validation‑related event logged with invalid inputs, validation details, and all required log elements. |
+| IC‑703‑TC‑005 | Verify logging for failed account creation | Negative | Successful verification completed. Invalid account data available. | Submit failing Create Account request and inspect logs. | Failed registration event logged with invoice fields, account fields, and all additional log elements. |
+| IC‑703‑TC‑006 | Verify logging for system errors or exceptions | Edge | Ability to trigger system error in test environment. | Trigger system error and inspect logs. | System error or exception event logged with relevant inputs, UTC timestamp, IP address, and all additional log elements. |
+
+---
+
+## Observability Validation Notes
+- Log entries are visible in Django Admin for all tested scenarios.
+- No unexpected errors or missing logs observed during normal or lockout conditions.
+- Logging behavior is consistent across Verify and Create Account endpoints.
+
+---
+
+## Risks & Edge Considerations
+- Rate‑limit testing depends on reliable reuse of the same IP address.
+- Misconfiguration of logging filters could hide events outside Django Admin.
+- Environmental differences could affect reproducibility of system error scenarios.
+
+---
+
+## Traceability
+- **Source Requirement:** Jira Ticket IC‑703 Acceptance Criteria  
+- **Related Tickets:** IC‑538 (SOC logging), IC‑701 (registration flow changes)  
+- **Related Agent Output:** Manual Test Cases — IC‑703  
+
+---
+
+## Notes
+This test set validates the **initial security logging and rate‑limiting implementation** for self‑registration. Any future changes to lockout thresholds, event naming, retention, or alerting behavior should be validated under separate Jira tickets and test plans.
