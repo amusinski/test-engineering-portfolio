@@ -1,10 +1,3 @@
-from __future__ import annotations
-from playwright.sync_api import expect
-from utils.auth import login
-from utils.logging import get_logger
-
-log = get_logger("[Dashboard Default View]")
-
 
 def test_dashboard_default_view(page) -> None:
     """
