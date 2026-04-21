@@ -1,8 +1,3 @@
-from playwright.sync_api import expect
-from test_helpers import make_log, authenticated_navigation
-
-_log = make_log("[Dashboard] [Expandable Card Accordion]")
-
 
 def test_dashboard_expandable_cards_default_and_toggle(page):
     """
