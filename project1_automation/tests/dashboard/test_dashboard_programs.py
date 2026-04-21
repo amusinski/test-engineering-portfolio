@@ -1,10 +1,3 @@
-from playwright.sync_api import expect
-from utils.auth import login
-from utils.logging import get_logger
-import re
-
-log = get_logger("[Dashboard Category Widget Validation]")
-
 
 def test_dashboard_category_widget_features(page):
     """
