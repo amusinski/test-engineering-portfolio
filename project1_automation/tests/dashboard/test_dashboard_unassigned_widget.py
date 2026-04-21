@@ -1,9 +1,3 @@
-from playwright.sync_api import expect
-from utils.auth import login
-from utils.logging import get_logger
-
-log = get_logger("[Dashboard Unassigned Items Metric]")
-
 
 def test_dashboard_unassigned_items_metric(page):
     """
