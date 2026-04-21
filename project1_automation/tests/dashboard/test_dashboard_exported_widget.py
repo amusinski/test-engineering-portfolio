@@ -1,9 +1,3 @@
-from playwright.sync_api import expect
-from utils.auth import login
-from utils.logging import get_logger
-
-log = get_logger("[Dashboard Exported Items Metric]")
-
 
 def test_dashboard_exported_items_last_30_days(page):
     """
