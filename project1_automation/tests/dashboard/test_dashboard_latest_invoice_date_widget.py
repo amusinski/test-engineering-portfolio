@@ -1,12 +1,3 @@
-from __future__ import annotations
-from datetime import datetime
-from urllib.parse import parse_qs, urlparse
-from playwright.sync_api import expect
-from utils.auth import login
-from utils.logging import get_logger
-
-log = get_logger("[Dashboard Summary: Latest Record Date]")
-
 
 def test_dashboard_latest_record_date_drives_filtered_results(page) -> None:
     """
