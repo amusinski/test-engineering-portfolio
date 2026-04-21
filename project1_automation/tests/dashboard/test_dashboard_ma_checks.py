@@ -1,9 +1,3 @@
-from playwright.sync_api import expect
-from utils.auth import login
-from utils.logging import get_logger
-
-log = get_logger("[Dashboard] [Entity Consistency Check]")
-
 
 def test_dashboard_entities_match_results_filter(page):
     """
