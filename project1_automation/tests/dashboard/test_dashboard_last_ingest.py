@@ -1,9 +1,3 @@
-import re
-
-from test_helpers import make_log, single_use_logins
-
-_log = make_log("[UI][Dashboard][Last Update Widget]")
-
 
 def test_last_update_widget(page):
     """
