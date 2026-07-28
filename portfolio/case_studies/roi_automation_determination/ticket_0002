@@ -1,0 +1,127 @@
+# Automation Strategy — Program Rematching After Submission Window Expiry
+
+**Related artifacts:**
+[Requirements & traceability](01-requirements-and-traceability.md) ·
+[Test cases](02-test-cases.md) ·
+[Review findings — re-review](03-review-findings-rereview.md)
+
+> Sanitized example from professional work. Program names are fictional stand-ins,
+> jurisdictions are anonymized as State A–D, and identifiers are synthetic. Source
+> requirement documents are internal and not included.
+
+| | |
+| --- | --- |
+| **Application** | Meterwise |
+| **Auth Type** | SSO |
+| **Change Type** | New Feature |
+| **Ticket** | MW-2170 |
+| **Title** | Prevent contractors from editing NHPP records past the 60-day submission window |
+
+**Description**
+
+Implement enforcement of the NHPP claim submission cutoff rule. Residential heat pump and
+heat pump water heater claims matched to NHPP programs become ineligible after 60 days from
+the invoice (sales) date. Claims past the cutoff should either be reassigned to eligible
+State A programs (State A Resi HVAC / State A WH) or moved to Expired status when no
+alternate program eligibility exists. The feature prevents contractors from editing or
+submitting claims that have exceeded the NHPP submission window, and supports compliance
+requirements.
+
+## Decision Summary
+
+| | |
+| --- | --- |
+| **Automation Decision** | Automate partially — lower layer preferred |
+| **Business Criticality** | **Critical** |
+| **Automation Tier** | Critical Path Regression |
+
+This feature enforces a compliance-driven submission window that directly impacts program
+eligibility, claim processing, and prevention of invalid submissions. Incorrect behavior
+could cause claims to be routed incorrectly or accepted after the allowed submission period.
+
+## What to Automate
+
+### API / Service Layer (primary coverage)
+
+- Verify eligibility calculation based on invoice date and the 60-day cutoff.
+- Verify NHPP HVAC claims remain eligible when `Today < Invoice Date + 60`.
+- Verify NHPP WH claims remain eligible when `Today < Invoice Date + 60`.
+- Verify claims become ineligible when `Today > Invoice Date + 60`.
+- Verify State A/B/C claims are reassigned to:
+  - State A Resi HVAC
+  - State A WH
+- Verify State D claims remain associated with NHPP programs and transition to Expired status.
+- Verify scheduled processing / date-evaluation logic (daily job or business service) using
+  controlled dates.
+- Verify program matching and reassignment behavior independently of the UI.
+
+### Thin UI Coverage
+
+- One UI scenario validating that an expired NHPP claim displays the expected status and
+  program outcome after backend processing.
+- One UI scenario validating that a reassigned claim displays the new program assignment
+  correctly.
+
+The purpose of UI coverage is **wiring validation only**, not exhaustive business-rule
+validation.
+
+## What Not to Automate
+
+### UI automation exclusions
+
+- Date-driven eligibility permutations across all state and program combinations.
+- Daily cron / scheduled processing behavior through the UI.
+- Large-contractor invoice override edge cases described in spec notes.
+- Cross-flow validation involving the future one-sale / multiple-claims architecture.
+- Administrative or manual data-correction scenarios performed outside normal contractor
+  workflows.
+- Undefined requirement areas:
+  - Expired claim edit/submission behavior.
+  - `DATE + 60` boundary condition.
+
+**Rationale**
+
+The core functionality is business-rule and program-matching logic, which is significantly
+more stable and maintainable at the API/service layer. UI automation would introduce
+unnecessary maintenance cost while providing little additional confidence.
+
+## Automation Tier Breakdown
+
+| Layer | Suite |
+| --- | --- |
+| API | Regression Suite |
+| Thin UI | Smoke / Critical Path |
+| Requirement gaps | **Manual until clarified** — Expired claim behavior; `DATE+60` exact boundary handling |
+
+## Tags
+
+`@critical` · `@api` · `@ui-thin` · `@regression` · `@smoke` · `@submission` · `@config`
+
+**Conditional until clarified**
+
+- `@high-maintenance` — if date-driven test data cannot be isolated cleanly
+- `@do-not-automate-ui`
+
+## Exit Criteria Checklist
+
+- [ ] Automation scope reviewed and approved
+- [ ] Appropriate automation layer identified
+- [ ] Regression coverage defined (or explicitly excluded)
+- [ ] Manual coverage documented for non-automated areas
+- [ ] Tracker tags applied based on automation decision
+
+**Manual coverage required for:**
+
+- Expired claim edit/submission behavior ambiguity
+- `DATE+60` boundary-condition ambiguity
+
+## Notes for QA / Dev
+
+- The feature is primarily eligibility and reassignment logic, making API/service-layer
+  automation the highest-ROI investment.
+- Avoid implementing multiple UI tests for every state and program combination.
+- Requirement gaps should be resolved before expanding automation:
+  1. Can Expired claims be edited or submitted?
+  2. What is the expected behavior when `Today = Invoice Date + 60`?
+- Any scheduled-job processing should be tested through controllable date injection, mocks,
+  or direct service invocation rather than waiting for actual cron execution.
