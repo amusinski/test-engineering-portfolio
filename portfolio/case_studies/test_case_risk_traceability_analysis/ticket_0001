@@ -1,0 +1,103 @@
+# Requirements & Traceability Assessment — Bulk Payee Creation & Approval Workflow
+
+**Related artifacts:**
+[Test cases](02-test-cases.md) ·
+[Initial review findings](03-review-findings-initial.md)
+
+> Sanitized example from professional work. Company, product, and third-party system names
+> are fictional stand-ins; identifiers are synthetic. Source requirement documents and test
+> plans are internal and not included.
+
+## Ticket Information
+
+| | |
+| --- | --- |
+| **Ticket #** | GL-1042 |
+| **Ticket Name** | Payee Management \| bulk payee creation and editing via command line tool \| Payee State — Pending |
+
+**User Story**
+
+> As a manager for a program on GridLens, I want any payees created or edited via the bulk
+> payee command line tool to automatically be placed in a Pending state, so that they follow
+> the same payee approval workflow as payees created and edited through the GridLens UI, and
+> no bulk-created or bulk-edited payee can receive a payment or be propagated to Ledgerline
+> without first being reviewed and approved by Finance.
+
+**Description**
+
+The ticket aligns bulk payee creation and editing performed through the command management
+script with the Payee Approval Workflow. Bulk-created and bulk-edited payees must enter the
+Pending state, and Ledgerline Organization API propagation must be deferred until Finance
+approval. Duplicate Ledgerline Organization Code validation must continue during bulk
+creation, and audit/change log tracking must be maintained.
+
+**Business Impacts**
+
+- Prevents unapproved payees from being propagated to Ledgerline.
+- Enforces a consistent approval workflow regardless of creation or edit method.
+- Protects data integrity through duplicate Ledgerline Organization Code validation.
+- Maintains auditability through required change log entries.
+
+**Impacted Roles**
+
+- Program Managers (per user story)
+- GridLens Support Users running bulk scripts
+- Finance Approver Users reviewing payees
+
+## Acceptance Criteria
+
+| AC ID | Acceptance Criteria |
+| --- | --- |
+| **AC-1** | All payees created via the bulk command management script are automatically set to Pending state upon creation. No bulk-created payee defaults to Approved. Pending state behaves identically to UI-created payees. |
+| **AC-2** | All payees edited via the bulk command management script are automatically moved to Pending state upon edit submission. Previously Approved payees must return to Pending until re-approved. |
+| **AC-3** | No Ledgerline Organization records are created or updated during bulk create/edit; API calls are deferred until approval. Duplicate Ledgerline Organization Code validation still occurs during bulk creation, and failures are clearly identified. |
+| **AC-4** | Bulk-created and bulk-edited payees appear in the Payee List View with Pending state displayed. |
+| **AC-5** | Bulk-created payees generate a change log entry with Date, By, Action = Payee Created, and required Note. |
+| **AC-6** | Bulk-edited payees generate a change log entry with Date, By, Action = Payee Edited, and required Note. |
+
+_Source: QC Test Plan — Test Plan and Acceptance Criteria sections._
+
+## Reviewed Manual Test Cases — Risk, Traceability & Classification
+
+| Test Case ID | AC Ref | Risk | Classification | Notes |
+| --- | --- | --- | --- | --- |
+| GL-1042-TC-001 | AC-1 | **High** | New Feature | Validates approval workflow entry state, prevents an unauthorized payment propagation path, and verifies state consistency with UI-created payees. |
+| GL-1042-TC-002 | AC-2 | **High** | New Feature | Validates state transition of existing approved records. Impacts approval controls and data governance. |
+| GL-1042-TC-003 | AC-3 | **High** | New Feature | Validates deferred Ledgerline integration and prevents premature external system updates. Significant data integrity and financial control risk. |
+| GL-1042-TC-004 | AC-3 | **High** | New Feature | Validates duplicate Ledgerline Organization Code detection and upload failure handling. Data integrity risk. |
+| GL-1042-TC-005 | AC-4 | Medium | New Feature | Validates visibility of Pending status for the approver workflow. Workflow impact exists but does not directly affect integrations or transaction processing. |
+| PAY-CL-T0-001 (Create) | AC-5 | Medium | New Feature | Validates audit trail creation for bulk-created payees. Important for traceability and compliance. |
+| PAY-CL-T0-001 (Edit) | AC-6 | Medium | New Feature | Validates audit trail creation for bulk-edited payees. Important for auditability and change history accuracy. |
+
+## Traceability Assessment
+
+### Acceptance Criteria Coverage Matrix
+
+| Acceptance Criteria | Covered By | Status |
+| --- | --- | --- |
+| AC-1 | GL-1042-TC-001 | ✅ Covered |
+| AC-2 | GL-1042-TC-002 | ✅ Covered |
+| AC-3 | GL-1042-TC-003, GL-1042-TC-004 | ✅ Covered |
+| AC-4 | GL-1042-TC-005 | ✅ Covered |
+| AC-5 | PAY-CL-T0-001 (Create) | ✅ Covered |
+| AC-6 | PAY-CL-T0-001 (Edit) | ✅ Covered |
+
+### Conclusion
+
+All acceptance criteria are traceable to at least one manual test case. No traceability gaps
+were identified. This conclusion is consistent with the QC Test Plan review section, which
+states that coverage aligns with all documented acceptance criteria.
+
+## Observations
+
+- **No regression test cases** were identified in the QC Test Plan. All documented cases
+  validate newly introduced workflow behavior and are appropriately classified as New Feature.
+- **Highest-risk areas:**
+  - Pending state enforcement
+  - Deferred Ledgerline API processing
+  - Duplicate Ledgerline Organization validation
+
+  These directly impact financial controls, data integrity, and downstream system
+  synchronization.
+- The ticket review section explicitly indicates "Traceability is valid" and "Coverage
+  aligns with all documented acceptance criteria."
