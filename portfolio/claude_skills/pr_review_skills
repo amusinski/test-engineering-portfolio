@@ -1,0 +1,24 @@
+# Pre-PR Review Commands
+
+Three focused Claude Code slash commands that review everything changed on a branch — diffed against main, not the whole repository — right before a pull request goes up: one for cleanup, one for code quality, one for security. Each has a deliberately different amount of authority to act on its own findings.
+
+## Why this exists
+
+A PR review is cheaper for everyone the closer it happens to the code actually being written, and cheapest of all when it catches something before a human reviewer ever has to. Scoping every check to the branch's actual diff against main — rather than the whole codebase — keeps each pass fast and keeps findings relevant to the exact work being shipped, not a drive-by audit of unrelated code the branch happens to touch.
+
+## The command family
+
+- **Cleanup.** Unused imports and variables, dead or commented-out code, unnecessarily complex expressions, formatting a linter wouldn't catch, unclear names, and stale docstrings/comments. Applies fixes directly — cleanup only, never a behavior change.
+- **Quality.** Duplicated logic that belongs in a shared helper, functions doing too much, magic values that should be named constants, missing type hints, overly broad exception handling, framework anti-patterns (manual setup where a fixture belongs, assertions that skip the framework's own matchers), naming that doesn't follow convention, and leftover workarounds or TODOs. Reports findings with file and line number and suggests specific fixes — makes no changes itself.
+- **Security.** Hardcoded credentials or tokens, values that should be environment variables but aren't, URLs carrying embedded auth, test data containing real identifiers that shouldn't be in source control, unsafe environment-variable handling, and dangerous patterns like unchecked `eval`/`exec`/`shell=True`. Reports only — never modifies anything, regardless of how obvious the fix looks.
+
+## Why the authority level changes across the three
+
+The three commands sit on a deliberate spectrum, not an arbitrary one. Cleanup findings are mechanical and behavior-preserving by definition — an unused import or a stale comment has exactly one correct fix, so there's no real risk in applying it automatically. Quality findings usually involve a judgment call about intent or architecture that the author is in a better position to make, so the command's job stops at surfacing the issue clearly with a concrete suggestion. Security findings are the highest-stakes category: an automatic "fix" to something that looks like a credential leak could just as easily hide a real problem or introduce a new one, so that command never touches the code — it only ever reports, full stop.
+
+## Engineering practices this family demonstrates
+
+- **Diff-scoped, not repo-scoped.** Every check runs only against files actually changed on the branch, so a review pass stays fast and stays honest about what the PR is actually shipping.
+- **Autonomy matched to reversibility.** How much a command is allowed to do on its own scales with how safe that action is to get wrong — mechanical and reversible gets auto-applied, judgment-dependent gets suggested, high-stakes gets reported only.
+- **Findings are actionable by construction.** Every reported issue comes with a file and line number and, where the command is allowed to suggest one, a specific fix — never a vague "consider reviewing this."
+- **Three small, single-purpose commands instead of one large one.** Each command has one job and one policy for what it's allowed to do about what it finds, rather than a single monolithic review command trying to apply different rules to different categories of finding internally.
