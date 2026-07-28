@@ -1,0 +1,100 @@
+# Requirements & Traceability Assessment — Program Rematching After Submission Window Expiry
+
+**Related artifacts:**
+[Test cases](02-test-cases.md) ·
+[Review findings — re-review](03-review-findings-rereview.md)
+
+> Sanitized example from professional work. Program names are fictional stand-ins,
+> jurisdictions are anonymized as State A–D, and identifiers are synthetic. Source
+> requirement documents are internal and not included.
+
+## Ticket Information
+
+| | |
+| --- | --- |
+| **Ticket #** | MW-2170 |
+| **Ticket Name** | Prevent contractors from editing NHPP records past the 60-day window |
+
+**User Story**
+
+> As a contractor using the Meterwise platform, I need NHPP claims to be automatically
+> restricted after the 60-day submission window, so that ineligible claims cannot continue
+> through the NHPP process and eligible claims can be reassigned to applicable State A
+> programs.
+
+**Description**
+
+Beginning with the program's enforcement start date, the NHPP HPWH and WH programs enforce a
+claim submission cutoff of 60 days after the sales (invoice) date. Claims that exceed the
+submission window should either be reassigned to State A programs (if eligible) or remain
+matched to NHPP and move to Expired status. The core objective is to prevent contractors
+from completing claims that have exceeded the submission deadline, and to enforce
+submission-window requirements.
+
+**Business Impacts**
+
+- Compliance with NHPP submission-window requirements.
+- Prevention of invalid claim submissions beyond the allowed deadline.
+- Protection of program eligibility and incentive-processing integrity.
+- Correct program reassignment for State A/B/C claims eligible for State A programs.
+
+**Impacted Roles**
+
+- Contractors
+- Operations Team (referenced in edge-case handling and administrative overrides)
+- Program Administrators / Claim Processors (via program matching and eligibility handling)
+
+## Acceptance Criteria
+
+| AC ID | Acceptance Criteria |
+| --- | --- |
+| **AC-1** | If today is less than DATE+60, the sale remains matched to NHPP HVAC or NHPP WH. |
+| **AC-2** | If today is greater than DATE+60, the sale is no longer eligible for NHPP HVAC or NHPP WH based on the submission window. |
+| **AC-2.1** | If the sale is also eligible for State A Resi HVAC or State A WH (install in State A, B, or C), the sale is rematched to State A Resi HVAC or State A WH. |
+| **AC-2.2** | If the sale is **not** eligible for State A Resi HVAC or State A WH (install in State D), the sale remains matched to NHPP HVAC or NHPP WH and is moved to Expired status. |
+
+## Traceability & Risk Classification Matrix
+
+| Test Case ID | AC Ref | Risk | Classification | Notes |
+| --- | --- | --- | --- | --- |
+| MW-2170-TC-001 | AC-1 | **High** | New Feature | Program eligibility determination within submission window. Incorrect behavior could impact claim routing and compliance. |
+| MW-2170-TC-002 | AC-1 | **High** | New Feature | Same validation as TC-001 for NHPP WH claims. Compliance-driven eligibility enforcement. |
+| MW-2170-TC-003 | AC-2, AC-2.1 | **High** | New Feature | Validates automatic program reassignment after cutoff. Incorrect reassignment could cause claim data integrity and processing issues. |
+| MW-2170-TC-004 | AC-2, AC-2.1 | **High** | New Feature | Validates WH reassignment workflow. Affects eligibility logic and program matching integrity. |
+| MW-2170-TC-005 | AC-2, AC-2.2 | **High** | New Feature | Validates expired-state handling for State D claims. Failure could allow invalid submissions beyond the compliance window. |
+| MW-2170-TC-006 | AC-2, AC-2.2 | **High** | New Feature | Validates expired-state handling for State D WH claims. Compliance and program eligibility risk. |
+| MW-2170-TC-007 | AC-2.2 | Medium | New Feature | Clarification test. Requirement gap regarding whether Expired claims can be edited or submitted. Traceability present but behavior undefined. |
+| MW-2170-TC-008 | AC-1, AC-2 | Medium | New Feature | Boundary-condition clarification for DATE+60. Acceptance criteria do not define behavior when today equals DATE+60. Traceability gap identified. |
+
+## Acceptance Criteria Coverage Analysis
+
+| Acceptance Criteria | Covered By |
+| --- | --- |
+| AC-1 | MW-2170-TC-001, MW-2170-TC-002, MW-2170-TC-008 |
+| AC-2 | MW-2170-TC-003, MW-2170-TC-004, MW-2170-TC-005, MW-2170-TC-006, MW-2170-TC-008 |
+| AC-2.1 | MW-2170-TC-003, MW-2170-TC-004 |
+| AC-2.2 | MW-2170-TC-005, MW-2170-TC-006, MW-2170-TC-007 |
+
+## Traceability Assessment
+
+**Are all acceptance criteria traceable to at least one test case?**
+
+✅ Yes. All documented acceptance criteria (AC-1, AC-2, AC-2.1, AC-2.2) are traceable to one
+or more manual test cases.
+
+### Gaps / Clarifications Identified
+
+| Gap ID | Description | Related Test Case |
+| --- | --- | --- |
+| **GAP-1** | Acceptance criteria state that State D claims move to Expired status, but do not define whether Expired claims can be edited, updated, or submitted. | MW-2170-TC-007 |
+| **GAP-2** | Acceptance criteria define behavior for today < DATE+60 and today > DATE+60, but not today = DATE+60. Boundary behavior is undefined. | MW-2170-TC-008 |
+
+## Risk Summary
+
+- **High Risk:** TC-001 through TC-006 — they validate compliance-driven program eligibility,
+  reassignment logic, claim status transitions, and prevention of invalid claim processing.
+- **Medium Risk:** TC-007 and TC-008 — they identify requirement ambiguities rather than
+  validating implemented business logic.
+
+**Overall Traceability Status:** ✅ Complete coverage, with two documented requirement
+ambiguities requiring business clarification before final signoff.
