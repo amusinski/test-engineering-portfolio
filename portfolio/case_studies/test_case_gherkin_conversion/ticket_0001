@@ -1,0 +1,11 @@
+Feature: IRIS-6982 - Bulk Created Payee Defaults to Pending State
+
+  Scenario: IRIS-6982-TC-001 - Bulk Created Payee Defaults to Pending State
+    Given an Iris Support user can run the bulk payee creation command management script
+      And valid new payee creation data is available
+    When the user runs the bulk payee creation command management script with a valid new payee record
+      And payee creation processing completes
+      And the created payee record is opened
+    Then the Payee State value is "Pending"
+      And the Payee State value is not "Approved"
+      And the Payee State matches the approval workflow behavior used for payees created through the Iris UI
