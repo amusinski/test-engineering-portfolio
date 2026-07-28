@@ -1,0 +1,278 @@
+# Test Cases — Program Rematching After Submission Window Expiry
+
+**System under test:** Meterwise (incentive claim matching engine)
+**Scope:** Residential heat pump and heat pump water heater sales matched to a regional
+program must re-evaluate program eligibility once the 60-day submission window has passed,
+with jurisdiction-dependent fallback behavior.
+
+> Sanitized example from professional work. Program names are fictional stand-ins and
+> jurisdictions are anonymized as State A–D; identifiers are synthetic.
+
+## Programs referenced
+
+| Short name | Description |
+| --- | --- |
+| NHPP HVAC | Regional heat pump program — HVAC measure. 60-day submission window from invoice date. |
+| NHPP WH | Regional heat pump program — water heater measure. 60-day submission window from invoice date. |
+| State A Resi HVAC | State-level residential HVAC program. Fallback for State A/B/C HVAC sales. |
+| State A WH | State-level residential water heater program. Fallback for State A/B/C WH sales. |
+
+## Summary
+
+| ID | Title | AC | Type |
+| --- | --- | --- | --- |
+| [MW-2170-TC-001](#mw-2170-tc-001--nhpp-hvac-sale-within-60-day-window-remains-matched) | NHPP HVAC sale within 60-day window remains matched | AC-1 | Functional · New |
+| [MW-2170-TC-002](#mw-2170-tc-002--nhpp-wh-sale-within-60-day-window-remains-matched) | NHPP WH sale within 60-day window remains matched | AC-1 | Functional · New |
+| [MW-2170-TC-003](#mw-2170-tc-003--over-60-day-state-abc-nhpp-hvac-sale-rematches-to-state-a-resi-hvac) | Over-60-day State A/B/C NHPP HVAC sale rematches to State A Resi HVAC | AC-2, AC-2.1 | Functional · New |
+| [MW-2170-TC-004](#mw-2170-tc-004--over-60-day-state-abc-nhpp-wh-sale-rematches-to-state-a-wh) | Over-60-day State A/B/C NHPP WH sale rematches to State A WH | AC-2, AC-2.1 | Functional · New |
+| [MW-2170-TC-005](#mw-2170-tc-005--over-60-day-state-d-nhpp-hvac-sale-remains-nhpp-and-moves-to-expired) | Over-60-day State D NHPP HVAC sale remains NHPP and moves to Expired | AC-2, AC-2.2 | Functional · New |
+| [MW-2170-TC-006](#mw-2170-tc-006--over-60-day-state-d-nhpp-wh-sale-remains-nhpp-and-moves-to-expired) | Over-60-day State D NHPP WH sale remains NHPP and moves to Expired | AC-2, AC-2.2 | Functional · New |
+| [MW-2170-TC-007](#mw-2170-tc-007--clarification-required--expired-claim-edit-and-submission-behavior) | Clarification — Expired claim edit and submission behavior | AC-2.2 | Clarification · New |
+| [MW-2170-TC-008](#mw-2170-tc-008--clarification-required--date60-boundary-condition) | Clarification — DATE+60 boundary condition | AC-1, AC-2 | Clarification · New |
+
+---
+
+## MW-2170-TC-001 — NHPP HVAC Sale Within 60-Day Window Remains Matched
+
+| | |
+| --- | --- |
+| **Acceptance Criterion** | AC-1 |
+| **Type** | Functional · New Test |
+
+**Preconditions**
+
+- Contractor user is logged in.
+- A residential heat pump sale exists in State A, B, C, or D.
+- The sale matches to NHPP HVAC.
+- The sale invoice date is less than 60 days before today.
+
+**Steps**
+
+1. Open the qualifying residential heat pump sale.
+2. Review the matched program for the sale.
+3. Verify the current program assignment.
+
+**Expected Result**
+
+- The sale remains matched to **NHPP HVAC** when today is less than DATE+60.
+
+**Actual Result**
+
+_Not run_
+
+---
+
+## MW-2170-TC-002 — NHPP WH Sale Within 60-Day Window Remains Matched
+
+| | |
+| --- | --- |
+| **Acceptance Criterion** | AC-1 |
+| **Type** | Functional · New Test |
+
+**Preconditions**
+
+- Contractor user is logged in.
+- A residential heat pump water heater sale exists in State A, B, C, or D.
+- The sale matches to NHPP WH.
+- The sale invoice date is less than 60 days before today.
+
+**Steps**
+
+1. Open the qualifying residential heat pump water heater sale.
+2. Review the matched program for the sale.
+3. Verify the current program assignment.
+
+**Expected Result**
+
+- The sale remains matched to **NHPP WH** when today is less than DATE+60.
+
+**Actual Result**
+
+_Not run_
+
+---
+
+## MW-2170-TC-003 — Over-60-Day State A/B/C NHPP HVAC Sale Rematches to State A Resi HVAC
+
+| | |
+| --- | --- |
+| **Acceptance Criterion** | AC-2, AC-2.1 |
+| **Type** | Functional · New Test |
+
+**Preconditions**
+
+- Contractor user is logged in.
+- A residential heat pump sale exists with install in State A, B, or C.
+- The sale initially matches to NHPP HVAC.
+- The sale is also eligible for State A Resi HVAC.
+- The sale invoice date is greater than 60 days before today.
+
+**Steps**
+
+1. Open the qualifying sale after the 60-day submission window has passed.
+2. Review the matched program for the sale.
+3. Verify the current program assignment.
+
+**Expected Result**
+
+- The sale is no longer eligible for NHPP HVAC based on the submission window.
+- The sale is rematched to **State A Resi HVAC**.
+
+**Actual Result**
+
+_Not run_
+
+---
+
+## MW-2170-TC-004 — Over-60-Day State A/B/C NHPP WH Sale Rematches to State A WH
+
+| | |
+| --- | --- |
+| **Acceptance Criterion** | AC-2, AC-2.1 |
+| **Type** | Functional · New Test |
+
+**Preconditions**
+
+- Contractor user is logged in.
+- A residential heat pump water heater sale exists with install in State A, B, or C.
+- The sale initially matches to NHPP WH.
+- The sale is also eligible for State A WH.
+- The sale invoice date is greater than 60 days before today.
+
+**Steps**
+
+1. Open the qualifying sale after the 60-day submission window has passed.
+2. Review the matched program for the sale.
+3. Verify the current program assignment.
+
+**Expected Result**
+
+- The sale is no longer eligible for NHPP WH based on the submission window.
+- The sale is rematched to **State A WH**.
+
+**Actual Result**
+
+_Not run_
+
+---
+
+## MW-2170-TC-005 — Over-60-Day State D NHPP HVAC Sale Remains NHPP and Moves to Expired
+
+| | |
+| --- | --- |
+| **Acceptance Criterion** | AC-2, AC-2.2 |
+| **Type** | Functional · New Test |
+
+**Preconditions**
+
+- Contractor user is logged in.
+- A residential heat pump sale exists with install in State D.
+- The sale initially matches to NHPP HVAC.
+- The sale is not eligible for State A Resi HVAC or State A WH.
+- The sale invoice date is greater than 60 days before today.
+
+**Steps**
+
+1. Open the qualifying State D sale after the 60-day submission window has passed.
+2. Review the matched program.
+3. Review the sale status.
+
+**Expected Result**
+
+- The sale remains matched to **NHPP HVAC**.
+- The sale status is **Expired**.
+
+**Actual Result**
+
+_Not run_
+
+---
+
+## MW-2170-TC-006 — Over-60-Day State D NHPP WH Sale Remains NHPP and Moves to Expired
+
+| | |
+| --- | --- |
+| **Acceptance Criterion** | AC-2, AC-2.2 |
+| **Type** | Functional · New Test |
+
+**Preconditions**
+
+- Contractor user is logged in.
+- A residential heat pump water heater sale exists with install in State D.
+- The sale initially matches to NHPP WH.
+- The sale is not eligible for State A Resi HVAC or State A WH.
+- The sale invoice date is greater than 60 days before today.
+
+**Steps**
+
+1. Open the qualifying State D sale after the 60-day submission window has passed.
+2. Review the matched program.
+3. Review the sale status.
+
+**Expected Result**
+
+- The sale remains matched to **NHPP WH**.
+- The sale status is **Expired**.
+
+**Actual Result**
+
+_Not run_
+
+---
+
+## MW-2170-TC-007 — Clarification Required — Expired Claim Edit and Submission Behavior
+
+| | |
+| --- | --- |
+| **Acceptance Criterion** | AC-2.2 |
+| **Type** | Clarification · New Test |
+
+**Preconditions**
+
+- A State D sale exists that remains matched to NHPP HVAC or NHPP WH after the 60-day
+  submission window.
+
+**Steps**
+
+1. Review the Acceptance Criteria.
+2. Review the requirements related to Expired status behavior.
+
+**Expected Result**
+
+**Clarification required.** The Acceptance Criteria specify that the sale remains matched
+to NHPP HVAC or NHPP WH and moves to Expired status, but do not specify whether an Expired
+claim can be edited or submitted.
+
+**Actual Result**
+
+_Not run_
+
+---
+
+## MW-2170-TC-008 — Clarification Required — DATE+60 Boundary Condition
+
+| | |
+| --- | --- |
+| **Acceptance Criterion** | AC-1, AC-2 |
+| **Type** | Clarification · New Test |
+
+**Preconditions**
+
+- A residential heat pump or heat pump water heater sale exists that matches to NHPP HVAC
+  or NHPP WH.
+- The invoice date is exactly 60 days before today.
+
+**Steps**
+
+1. Open the qualifying sale on DATE+60.
+2. Review the matched program.
+3. Review the sale status.
+
+**Expected Result**
+
+**Clarification required.** The Acceptance Criteria define behavior when today is less than
+DATE+60 and greater than DATE+60, but do not define behavior when today equals DATE+60.
+
+**Actual Result**
+
+_Not run_
