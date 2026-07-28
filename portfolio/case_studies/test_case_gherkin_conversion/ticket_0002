@@ -1,0 +1,10 @@
+Feature: IC-894 - NEHPA HVAC Sale Within 60-Day Window Remains Matched
+
+  Scenario: IC-894-TC-001 - NEHPA HVAC Sale Within 60-Day Window Remains Matched
+    Given a Contractor user is logged in
+      And a residential heat pump sale exists in MA, NH, RI, or CT
+      And the sale is matched to "NEHPA HVAC"
+      And the sale invoice date is less than 60 days before today
+    When the user opens the qualifying residential heat pump sale
+    Then the sale remains matched to "NEHPA HVAC"
+      And the current program assignment is "NEHPA HVAC"
