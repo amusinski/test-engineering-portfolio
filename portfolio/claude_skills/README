@@ -1,0 +1,48 @@
+# Claude Code Skills: QA Automation & Usability-Review Agents
+
+A collection of [Claude Code](https://claude.com/claude-code) custom slash commands ("skills") built to run, harden, and extend a large Playwright end-to-end test suite for an enterprise web application, plus an experimental agent that reviews live pages for usability and accessibility issues. Each skill is a markdown file under `.claude/commands/` — instructions an engineer can invoke conversationally (`/run-lifecycle`, `/usability-review`, etc.) instead of remembering a pile of CLI flags.
+
+This repo contains sanitized versions of skills originally built against a proprietary test suite. Business-specific names, internal ticket references, and environment details have been generalized or removed; the underlying patterns and code are otherwise unchanged.
+
+## What's here
+
+### 1. Test execution commands
+A family of commands (`run-single`, `run-misc`, `run-bulk-upload`, `run-smoke`, `run-lifecycle`, `run-custom`, `run-all-groups`, `run-full-suite`) that wrap a ~140-test Playwright + pytest-xdist suite. Each targets a different slice of coverage (one test, a named group, a custom filter, the full suite) and shares a common shape:
+
+- Interactive when invoked with no arguments — the command asks what to run and against which environment rather than guessing
+- Always confirms scope and estimated runtime before executing
+- Derives test counts and worker counts dynamically instead of hardcoding numbers that drift out of date
+- Produces two outputs every time: a structured HTML report (Artifact) and an inline markdown summary table, so results are reviewable both as a shareable page and directly in the terminal/chat
+
+These went through several hardening passes — replacing static lookup tables with computed values, adding mandatory ID extraction before report generation, and adding a pre-publish verification step so a broken run can't silently produce a report that looks fine.
+
+### 2. Pre-PR quality gates
+Three lightweight commands (`pre-pr-cleanup`, `pre-pr-quality`, `pre-pr-security`) that run before opening a pull request: strip scaffolding/debug artifacts left over from development, run a quality/consistency pass, and check for common security issues. Small, focused, and meant to run in sequence as a checklist.
+
+### 3. Living repair playbook
+`fix-htmx-lifecycle` is a skill built to survive an in-flight UI migration: the application's forms were being incrementally reworked from one widget library to another, breaking existing tests in recurring, recognizable ways. Rather than re-diagnosing each failure from scratch, the command maintains a **pattern catalog** — symptom, root cause, fix location, and whether the fix is already applied suite-wide or needs verifying per-page — that grew from a handful of entries to a dozen-plus over several sessions. New failures are checked against the catalog first; genuinely new symptoms get diagnosed and added. It also draws an explicit line between "this is an intentional interface change to adapt to" and "this is a real regression to flag," which matters when the two produce visually identical test failures.
+
+### 4. Usability & accessibility review agent
+`usability-review` is the newest and most exploratory skill: point it at a live page (with existing SSO test infrastructure handling login) and it produces a structured usability report across six lenses — visual hierarchy, navigation/wayfinding, consistency, information density, actionability, and accessibility — as both an HTML report and a chat table.
+
+The interesting engineering problem here was **not treating "accessibility" as a lens Claude could eyeball from a screenshot**. An early version claimed accessibility coverage but only made visual judgment calls, and missed real WCAG contrast failures. The fix was a small DOM/CSS extraction script (run via Playwright's `page.evaluate`) that computes actual facts from live computed styles before Claude ever narrates anything:
+
+- WCAG contrast ratios (proper relative-luminance math, not a pixel-color guess), including correctly resolving an element's *effective* background by walking up the DOM to the nearest opaque ancestor — a naive version misjudged plenty of perfectly-fine text as failing because it fell back straight to the page background instead of the actual (differently colored) panel the element visually sits on
+- Missing accessible names on interactive elements
+- Touch targets under the WCAG 2.5.8 minimum size
+- Color-only link indicators
+- Findings are grouped by shared signature rather than reported one row per element, so a 300-row data table produces one grouped finding with a count instead of 300 near-duplicates
+
+The general principle — a deterministic script computes the numbers, the model only narrates them — is used consistently across these skills rather than being specific to this one.
+
+## Design principles across all of these
+
+- **Confirm before running.** Every command that costs real time (a 45-minute full suite run) or touches shared state asks for explicit confirmation first, rather than assuming.
+- **Two outputs, always.** Structured HTML report + inline chat summary, not one or the other — different consumption contexts need different formats.
+- **Compute, don't guess.** Wherever a skill could ask an LLM to eyeball something that's actually measurable (test counts, accessibility contrast, worker counts), a small script computes the real number first.
+- **Generic over brittle.** Selectors and signals are written against structural/ARIA patterns (`button, a, [role="button"]`, `[aria-current]`) rather than app-specific class names, so they don't silently break when unrelated markup changes.
+- **Guard against silent fallbacks.** Several commands explicitly validate inputs against a known set before running, specifically because the underlying test config resolves unrecognized environment names to a default rather than erroring — a typo shouldn't produce a misleadingly clean report for the wrong environment.
+
+## Stack
+
+Playwright (Python, sync API), pytest + pytest-xdist, Allure for structured test attachments, Claude Code custom slash commands, and small deterministic Python scripts for report/signal generation feeding into HTML Artifacts.
