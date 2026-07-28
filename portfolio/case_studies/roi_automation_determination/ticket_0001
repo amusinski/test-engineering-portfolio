@@ -1,0 +1,128 @@
+# Automation Strategy — Bulk Payee Creation & Approval Workflow
+
+**Related artifacts:**
+[Requirements & traceability](01-requirements-and-traceability.md) ·
+[Test cases](02-test-cases.md) ·
+[Review findings — initial](03-review-findings-initial.md)
+
+> Sanitized example from professional work. Company, product, and third-party system names
+> are fictional stand-ins; identifiers are synthetic. Source requirement documents and test
+> plans are internal and not included.
+
+| | |
+| --- | --- |
+| **Application** | GridLens |
+| **Change Type** | New Feature |
+| **Ticket** | GL-1042 |
+
+## Decision Summary
+
+| | |
+| --- | --- |
+| **Automation Decision** | Automate partially — lower layer first |
+| **Business Criticality** | **Critical** |
+
+The core behavior is business-rule and integration-gating logic triggered by a command-line
+bulk processing workflow. Most value is achieved through API/service-level automation rather
+than UI automation. A thin UI validation is justified only to verify Pending state visibility
+in the Payee List View.
+
+**Criticality justification**
+
+- Controls whether payees can proceed through the Finance approval workflow before payment
+  activity occurs.
+- Prevents premature propagation to Ledgerline.
+- Enforces approval governance and auditability requirements.
+- Includes financial data integrity protections through duplicate Ledgerline Organization
+  Code validation.
+
+## What to Automate
+
+### API / Service Layer (primary automation target)
+
+**1. Bulk create → Pending state** · _Layer: API_
+
+- Verify payees created through the bulk process are stored with `Pending` state.
+- Verify no bulk-created payee defaults to `Approved`.
+
+**2. Approved payee edited → Pending state** · _Layer: API_
+
+- Verify editing an approved payee moves the payee back to `Pending`.
+- Verify approval is required again after modification.
+
+**3. Ledgerline propagation suppression** · _Layer: API / Integration_
+
+- Verify the Ledgerline Organization API is **not** invoked during bulk creation.
+- Verify the Ledgerline Organization API is **not** invoked during bulk edit submission.
+- Verify invocation occurs only after approval workflow completion.
+
+**4. Duplicate Ledgerline Organization Code validation** · _Layer: API_
+
+- Verify duplicate detection occurs during bulk creation.
+- Verify duplicate rows fail.
+- Verify the failure reason is returned in processing results.
+- Verify non-duplicate rows continue processing.
+
+**5. Change log creation** · _Layer: API / Repository_
+
+- Verify a "Payee Created" audit entry is generated.
+- Verify a "Payee Edited" audit entry is generated.
+- Verify correct audit metadata: timestamp, acting support user, action, note text.
+
+### Thin UI Automation (single high-value verification)
+
+**6. Pending state visibility in Payee List** · _Layer: UI (thin)_
+
+- Verify the bulk-created payee displays `Pending`.
+- Verify the bulk-edited payee displays `Pending`.
+- Verify state is visible in the Payee State column.
+
+## What Not to Automate
+
+**Full end-to-end bulk script → approval → ERP workflow via UI** — _do not automate through UI_
+
+- Requires command-line execution plus approval workflow plus external integration validation.
+- Cross-system dependency introduces maintenance risk.
+- Better validated with service/integration tests.
+
+**Validation of external integration infrastructure** — _do not automate in UI_
+
+- External Ledgerline interaction is an integration concern.
+- The UI is not the lowest stable layer.
+
+**Full audit trail navigation testing** — _do not automate through UI_
+
+- Audit records should be validated directly through service/repository assertions.
+- The UI adds no meaningful business coverage.
+
+## Automation Tier
+
+| Tier | Coverage |
+| --- | --- |
+| **Smoke** | None |
+| **Critical Path** | Bulk create → Pending · Bulk edit → Pending · Ledgerline propagation blocked until approval |
+| **Regression** | Duplicate Organization Code validation · Change log creation · Pending state list visibility |
+| **Manual Only** | Cross-system operational verification when dependent environments are unstable or unavailable |
+
+## Tags
+
+`@critical` · `@api` · `@ui-thin` · `@regression` · `@config` · `@submission` · `@third-party` · `@do-not-automate-ui`
+
+## Exit Criteria Checklist
+
+- [ ] Automation scope reviewed and approved
+- [ ] Appropriate automation layer identified
+- [ ] Regression coverage defined (or explicitly excluded)
+- [ ] Manual coverage documented for non-automated areas
+- [ ] Tracker tags applied based on automation decision
+
+## Notes for QA / Dev
+
+- The ticket primarily modifies state-transition and integration-trigger behavior rather than
+  UI behavior. Automation ROI is highest at the API/service layer.
+- Ledgerline propagation gating should be validated through service mocks, integration
+  assertions, or API-level verification rather than browser-driven flows.
+- Limit UI coverage to a single visibility check confirming bulk-created and bulk-edited
+  payees appear in the Payee List View with a `Pending` status.
+- Audit log validation should be performed below the UI layer to keep tests fast, reliable,
+  and maintainable.
