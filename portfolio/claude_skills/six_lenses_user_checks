@@ -1,0 +1,58 @@
+# Usability & Accessibility Review Agent
+
+A Claude Code skill that logs into a live web application, captures a real page view, and produces a structured usability/accessibility report — combining an LLM's judgment on subjective design qualities with deterministic, code-computed measurements wherever a real measurement is possible. Built as a prototype to answer a specific question: *can an agent do a first-pass usability sweep that's fast and consistent, without quietly turning "accessibility review" into "the AI looked at a screenshot and said it seemed fine"?*
+
+## Why this exists
+
+Usability review is normally a manual, ad hoc pass — a designer or QA engineer eyeballing a page and writing up impressions. That doesn't scale, and it happens rarely (usually only around a launch), so regressions between reviews go unnoticed. The goal was to see whether a page review could be triggered on demand, run consistently, and — critically — be honest about which of its findings are genuine judgment calls versus things that were actually measured.
+
+## Architecture
+
+**Capture test (Playwright).** Reuses existing test infrastructure end to end: authenticates through the same login helper the functional test suite already uses, navigates to the target view, and takes a screenshot. Deliberately a *viewport-only* screenshot, not a full-page one — an early attempt at full-page capture produced an image over 13,000px tall because one page's main data table renders unpaginated, which is unreviewable at any sane resolution. Scroll depth is recorded as its own signal instead of forced into an unreviewable image.
+
+**Signal-extraction script.** A small module run via Playwright's `page.evaluate`, executed against the live DOM immediately after capture. It computes, from real computed styles:
+- WCAG contrast ratios (actual relative-luminance math against the *effective* background — see below — not a pixel-color guess)
+- Presence/absence of accessible names on interactive elements
+- Touch-target sizing against the WCAG 2.5.8 minimum
+- Color-only link indicators
+- Table row density and active-nav-state counts
+
+Selectors are generic (`button, a, input, [role="button"]`, `[aria-current]`) rather than app-specific, so the script doesn't quietly break the next time unrelated markup changes. Findings that share a root cause are grouped into one row with a count instead of one row per element — a 300-row table shouldn't produce 300 near-identical findings.
+
+**The skill itself.** Orchestrates the run: confirms scope with the user, executes the capture test, verifies the screenshot is actually fresh (not a stale leftover from a previous run) before trusting it, reviews it across six lenses, and always produces both a structured HTML report and an inline chat summary table.
+
+## The six lenses
+
+Visual hierarchy & clutter, navigation & wayfinding, consistency, information density, actionability of primary actions, and accessibility. The last is fully measurement-backed; hierarchy/clutter and consistency remain genuine judgment calls, but are supported by objective counts (element counts, distinct font families, distinct border-radius values) rather than judgment in a vacuum.
+
+## The engineering story worth telling
+
+The first working version already claimed to cover "accessibility" as one of its six lenses. It didn't hold up: pressed on whether it had actually accounted for accessibility, the honest answer was that it had only made a visual judgment call ("contrast looks fine"). A quick manual pixel-sampling pass against the same screenshot found three real WCAG AA contrast failures the vision-only pass had missed entirely — a green primary action button, a numeric status badge, and an active navigation item, all under the 4.5:1 threshold.
+
+That prompted rebuilding the accessibility lens on top of real computed-style extraction instead of a screenshot judgment call. That rebuild surfaced two more bugs worth noting:
+
+1. **Background resolution.** Contrast math needs the *effective* background behind a piece of text, not the element's own background. Plenty of interactive elements have a transparent background of their own and visually sit on a colored ancestor panel several DOM levels up (a sidebar link, for instance, sitting on a dark panel rather than the page's white background). The first version fell back straight to the page background when an element's own background was transparent, which misjudged plenty of perfectly legible text as failing. Fixed by walking up the DOM to the nearest ancestor with an actual opaque background.
+2. **Finding volume.** Once real measurement replaced eyeballing, a data-dense page produced over a thousand lines of near-duplicate findings (every small numeric link in a large table individually flagged as an undersized touch target). Fixed with signature-based grouping so systemic issues surface as one finding with a count, not a wall of repetition.
+
+The throughline: a lens being *listed* in a report's spec is not the same as it being *rigorously checked* — worth stating explicitly rather than letting a plausible-sounding report imply more rigor than it has.
+
+## Current state
+
+Capture test, signal-extraction module, and the orchestrating skill are built and working end to end against a live environment. Not yet built: broader page coverage beyond a single view (see below), and a live re-verification pass specifically targeting the background-resolution and grouping fixes on a second real page.
+
+---
+
+## Secondary: pairing this with lightweight cross-page sweeps
+
+The functional end-to-end suite this reuses infrastructure from is deep, not wide — it drives a handful of core transactional flows through real business logic, and in doing so visits only the small number of pages those flows touch. Large parts of a typical application (reports, messaging, support, administration, settings) are never visited by automation at all, simply because there's no business-logic reason for a lifecycle test to go there.
+
+The idea under discussion: a separate, deliberately lightweight file of Playwright tests whose entire job is to *move from link to link* — no forms, no data setup, no business assertions — purely to land the browser on a page long enough to run the same signal-extraction module already built for this skill. Where a full lifecycle test might take minutes to set up the state needed to reach a page, a link-hop test costs a login and a couple of clicks, so far more of the application can be swept per run.
+
+**Why this is worth doing, not just cheap:** run regularly (alongside the existing automation, e.g. on the same schedule or PR-preview trigger), each sweep's signals can be stored and diffed against a baseline over time. That turns this from a one-off audit into a continuous design-regression detector — catching things like "a component's color changed and a button now fails contrast" or "a new page shipped with no accessible names on its primary actions" automatically, the same way functional tests catch behavioral regressions, rather than waiting for the next manual review.
+
+**The constraint that actually shapes the design:** the existing suite runs in parallel (pytest-xdist), so any new tests have to assume no shared state and no guaranteed ordering between separate test functions. Two patterns were considered:
+
+- **Independent hops (preferred for broad coverage).** Each test function logs in and navigates directly to its one target page. Slightly more repetition (a login and a couple of clicks per test), but fully isolated and safe under parallel execution — this is the default choice for sweeping as many pages as possible.
+- **Single connected journey.** One test function captures signals at multiple points along a single navigation path (e.g., landing page → a list view → a detail view). Still one self-contained test, so it doesn't introduce cross-test ordering dependencies, but it's reserved for cases where the *transition itself* is what's being evaluated — does the user lose their place, does a breadcrumb update correctly, does "back" behave sensibly — rather than being used as a shortcut to visit more pages per test.
+
+**What this doesn't replace:** a scripted sweep, however broad, is still not a substitute for real user testing or a full manual accessibility audit — no screen-reader behavior, no keyboard-only navigation, no real assistive technology in the loop. The value is a fast, repeatable, low-cost first-pass safety net that can run continuously, not a replacement for deeper review.
