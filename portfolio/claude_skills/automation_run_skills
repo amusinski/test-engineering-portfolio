@@ -1,0 +1,32 @@
+# Playwright Test Execution Commands
+
+A family of Claude Code slash commands that wraps a large, parallelized Playwright + pytest end-to-end suite, so any slice of coverage — a single test, a themed group, a fully custom filter, or the entire suite — can be triggered conversationally and comes back as a consistent, review-ready report every time.
+
+## Why this exists
+
+Running this suite from raw pytest means remembering environment flags, marker syntax, xdist worker counts, and reporting flags, then manually building a results table from log output for anyone who isn't going to read the terminal output themselves. These commands collapse all of that into a short exchange: which tests, against which environment, ready to go?
+
+## The command family
+
+- **A single-test runner** — one test, run sequentially (a single browser session, so results stay unambiguous), full report.
+- **Themed group runners** — one command per named slice of coverage (a lifecycle-style flow, a bulk-data-upload flow, a smoke subset, a miscellaneous-tests bucket), each scoped to what that group actually needs.
+- **A custom-filter runner** — an arbitrary marker/keyword expression for coverage that doesn't fit a named group.
+- **An all-groups runner** — every themed group, one after another, each producing its own report.
+- **A full-suite runner** — the entire suite in one parallel run, using a two-pass strategy: pass one runs everything at the requested worker count, pass two retries only the failures at a lower, steadier worker count. The two passes are always reported separately, so a failure that disappears under lighter load reads as load-induced flakiness rather than getting conflated with a real regression.
+
+## How a run happens
+
+1. **Interactive scoping.** Every command confirms the test target, environment, worker count, and who's running it before executing anything. Worker counts are capped, with a warning if a larger number is requested, so a run can't accidentally oversubscribe shared infrastructure.
+2. **Execution.** Sequential for single-test runs; parallel (pytest-xdist) for group and suite runs. Results are captured in a structured format (JSON results plus log/attachment files) rather than parsed from raw console output.
+3. **Record-ID extraction.** After a run, a small script parses the structured results and their attachments to pull out the identifiers of whatever records the tests created, straight from log lines the tests already emit — no re-parsing of free-form text. Underneath, this uses a small recorder pattern: a test calls a single helper the moment it learns an ID, that helper writes to a registry that survives parallel worker processes, and the ID lands in the structured output automatically.
+4. **Report generation.** A deterministic script — not the model — builds the report's actual structure: columns, row data, status coloring, all derived directly from the structured results. The model's role is limited to the judgment calls a script can't make: summarizing a failure's error, and classifying whether it looks like a new regression or a pre-existing issue.
+5. **Pre-publish verification.** Before anything is shown to the user, a fixed checklist runs against the report: row counts match the structured results exactly, status values come from a closed set, record IDs are correctly linked, and the column schema matches spec. Any discrepancy gets fixed before publishing — nothing goes out unverified.
+6. **Dual output.** Every run produces both a structured HTML report and an inline markdown summary table — never just one.
+
+## Engineering practices this family demonstrates
+
+- **Confirm before running.** Anything with a real time cost or shared-resource impact — a run that takes the better part of an hour, a parallel run against shared infrastructure — gets explicit confirmation and a worker-count ceiling first.
+- **Compute, don't maintain lookup tables.** Test counts, worker defaults, and human-readable display names are all derived algorithmically from the test files themselves via a fixed, general set of rules, rather than a table of names that drifts stale the moment a new test is added. A new test file needs zero changes to any run command to show up correctly formatted in a report.
+- **Investigate every failure.** No failure is assumed pre-existing without checking — reports get treated as a source of truth by people who won't independently verify every row, so that assumption has to be earned by an actual investigation each time, not asserted.
+- **Separate what happened from why.** Failure summaries and root-cause analysis are always two distinct report sections, never merged — a fast scan of what broke shouldn't get tangled with the slower judgment call about why.
+- **Verification is a gate, not an afterthought.** A report is not published, and a chat table is not posted, until it has been checked line-by-line against the actual raw result data — the checklist step exists specifically to catch a plausible-looking report that's subtly wrong.
