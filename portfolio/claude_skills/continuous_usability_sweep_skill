@@ -1,0 +1,34 @@
+# Continuous Usability Sweep
+
+A lightweight layer of Playwright tests whose only job is to move from link to link across an application and capture usability/accessibility signals along the way — turning a single-page usability review into a site-wide, continuously-run safety net instead of a one-off audit.
+
+## The coverage gap this fills
+
+A functional end-to-end suite is deep, not wide. It drives a handful of core transactional flows through real business logic, and in doing so visits only the small number of pages those flows happen to touch. Everything else an application has — reports, messaging, settings, administration, secondary views nobody's checkout flow passes through — gets zero automated attention, not because it doesn't matter, but because there's no business-logic reason for a functional test to go there.
+
+This layer exists specifically to cover that gap, and it can afford to, because it asks almost nothing of each page: no form to fill, no data to set up, no business assertion to make. It costs a login and a couple of clicks per page instead of the minutes a full functional test needs to reach the same page through real workflow state. That asymmetry is what makes sweeping dozens of pages routinely, instead of once around a launch, actually affordable.
+
+## How it works
+
+Each test in this layer reuses the same signal-extraction module a single-page usability review already runs: it authenticates, lands on a target page, and computes real facts from the live DOM — contrast ratios against the actual effective background, presence of accessible names on interactive elements, touch-target sizing, color-only link indicators, and structural density signals like table row counts. No screenshot judgment call is required for this layer to do useful work; the numbers alone are enough to flag a problem.
+
+Two shapes of test cover two different questions:
+
+- **Independent hops**, used for breadth. Each test function logs in and navigates directly to one target page, runs the signal scan, and ends. This is the default shape for sweeping as much of the application as possible, and it's fully self-contained — nothing about it depends on any other test having run first or last.
+- **A single connected journey**, used when the *transition itself* is the thing being evaluated rather than the destination page in isolation — does a breadcrumb update correctly, does the user's place in a multi-step flow stay legible, does "back" behave the way someone would expect. One test function captures signals at several points along one deliberate path (landing page → a list view → a detail view), rather than treating each capture as its own independent test.
+
+Both shapes assume no shared state and no guaranteed ordering between separate test functions, because the suite they sit alongside already runs in parallel. A test that only works if some other test ran first is a latent flake under that model, so every independent hop pays for its own login and navigation rather than borrowing state from a neighbor.
+
+## From one-off audit to continuous regression detector
+
+A single usability review answers "how does this page look right now." Run the same sweep on a recurring cadence — alongside the existing automation, on the same schedule or PR-preview trigger — and each run's signals get stored and compared against the last known-good baseline for that same page. That comparison is what turns this into a regression detector rather than a snapshot:
+
+- A contrast ratio that used to clear the WCAG threshold and no longer does flags as a design regression, not a pre-existing issue — the same "new regression vs. pre-existing" discipline a functional test failure gets, applied to a visual/accessibility fact instead of a pass/fail assertion.
+- A page that previously had zero missing accessible names and now has several flags the specific change, not just "some button somewhere lacks a label."
+- A touch target that shrank below the minimum size, or a new page that shipped with none of these problems caught at all, both become visible automatically instead of waiting for the next manual pass.
+
+This is the actual value multiplier: a full manual accessibility or usability audit happens rarely because it's expensive and someone has to remember to schedule it. A signal sweep that already runs as part of routine automation costs nothing extra to repeat, so the interval between "a real problem exists" and "someone finds out" shrinks from however long it takes to schedule a review down to however often the suite already runs.
+
+## What this doesn't replace
+
+However broad the sweep, it's still a scripted DOM read, not a person using the product. It has no opinion on whether an interaction actually feels good, doesn't drive a screen reader, doesn't test keyboard-only navigation, and doesn't reproduce how real assistive technology actually behaves. The value here is a fast, repeatable, low-cost first-pass net that catches drift continuously — it narrows what a deeper manual review needs to spend time on, it doesn't stand in for one.
