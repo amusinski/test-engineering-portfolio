@@ -1,17 +1,38 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>{{ store_name }}</title>
-</head>
-<body>
-    <header>
-        <h1>{{ store_name }}</h1>
-        <p>{{ tagline }}</p>
-    </header>
+{% extends "storefront/base.html" %}
 
-    <main>
-        <p>Welcome. This is the landing page, served by the storefront app.</p>
-    </main>
-</body>
-</html>
+{% block content %}
+<section class="hero">
+    <div class="container">
+        <h1>{{ store_name }}</h1>
+        <p class="tagline" data-testid="tagline-text">{{ tagline }}</p>
+        <a class="btn btn-primary" href="#contact" data-testid="get-in-touch-btn">Get In Touch</a>
+    </div>
+</section>
+
+<section id="services" class="services">
+    <div class="container">
+        <h2>What We Offer</h2>
+        <div class="card-grid">
+            <div class="card">
+                <h3>Quality First</h3>
+                <p>Every product and process is checked before it reaches you.</p>
+            </div>
+            <div class="card">
+                <h3>Local &amp; Trusted</h3>
+                <p>A family-run business, built on relationships with our community.</p>
+            </div>
+            <div class="card">
+                <h3>Always Improving</h3>
+                <p>We test, learn, and refine — so the experience keeps getting better.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="contact" class="contact">
+    <div class="container">
+        <h2>Get in Touch</h2>
+        <p>Reach out and we'll get back to you shortly.</p>
+    </div>
+</section>
+{% endblock %}
