@@ -10,10 +10,10 @@
 <body>
     <header class="site-header">
         <div class="container header-inner">
-            <a class="brand" href="{% url 'landing' %}">{{ store_name }}</a>
+            <a class="brand" href="{% url 'landing' %}" data-testid="brand-logo-link">{{ store_name }}</a>
             <nav class="site-nav">
-                <a href="#services">Services</a>
-                <a href="#contact">Contact</a>
+                <a href="#services" data-testid="services-link">Services</a>
+                <a href="#contact" data-testid="contact-link">Contact</a>
             </nav>
         </div>
     </header>
@@ -24,7 +24,7 @@
 
     <footer class="site-footer">
         <div class="container">
-            <p>&copy; {{ store_name }}. All rights reserved.</p>
+            <p data-testid="footer-copyright">&copy; {{ store_name }}. All rights reserved.</p>
         </div>
     </footer>
 </body>
