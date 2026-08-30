@@ -115,6 +115,11 @@ a {
     transform: translateY(-1px);
 }
 
+/* ---------- Menu categories ---------- */
+.menu-categories {
+    padding: 4rem 1.5rem;
+}
+
 /* ---------- Services ---------- */
 .services {
     padding: 4rem 1.5rem;
@@ -122,6 +127,7 @@ a {
 }
 
 .services h2,
+.menu-categories h2,
 .contact h2 {
     text-align: center;
     margin-bottom: 2.5rem;
@@ -149,6 +155,27 @@ a {
 
 .card p {
     color: var(--color-text-muted);
+}
+
+.card-links {
+    list-style: none;
+}
+
+.card-links li {
+    padding: 0.35rem 0;
+    border-bottom: 1px solid var(--color-bg-alt);
+}
+
+.card-links li:last-child {
+    border-bottom: none;
+}
+
+.card-links a {
+    color: var(--color-text);
+}
+
+.card-links a:hover {
+    color: var(--color-primary);
 }
 
 /* ---------- Contact ---------- */

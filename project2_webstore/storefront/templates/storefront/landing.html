@@ -5,34 +5,43 @@
     <div class="container">
         <h1 data-testid="hero-heading">{{ store_name }}</h1>
         <p class="tagline" data-testid="tagline-text">{{ tagline }}</p>
-        <a class="btn btn-primary" href="#contact" data-testid="get-in-touch-btn">Get In Touch</a>
     </div>
 </section>
 
-<section id="services" class="services">
+<section id="menu" class="menu-categories">
     <div class="container">
-        <h2>What We Offer</h2>
+        <h2>Browse Our Menu</h2>
         <div class="card-grid">
-            <div class="card" data-testid="service-card">
-                <h3>Quality First</h3>
-                <p>Every product and process is checked before it reaches you.</p>
+            <div class="card" data-testid="category-card-teas">
+                <h3>Teas</h3>
+                <ul class="card-links">
+                    <li><a href="#" data-testid="teas-monthly-specials-link">Monthly Specials</a></li>
+                    <li><a href="#" data-testid="teas-loaded-link">Loaded</a></li>
+                    <li><a href="#" data-testid="teas-pretty-link">Pretty</a></li>
+                    <li><a href="#" data-testid="teas-pretty-lit-link">Pretty Lit</a></li>
+                    <li><a href="#" data-testid="teas-quenchers-link">Quenchers</a></li>
+                </ul>
             </div>
-            <div class="card" data-testid="service-card">
-                <h3>Local &amp; Trusted</h3>
-                <p>A family-run business, built on relationships with our community.</p>
+            <div class="card" data-testid="category-card-shakes">
+                <h3>Shakes</h3>
+                <ul class="card-links">
+                    <li><a href="#" data-testid="shakes-monthly-specials-link">Monthly Specials</a></li>
+                    <li><a href="#" data-testid="shakes-vanilla-link">Vanilla</a></li>
+                    <li><a href="#" data-testid="shakes-chocolate-link">Chocolate</a></li>
+                    <li><a href="#" data-testid="shakes-fruity-link">Fruity</a></li>
+                    <li><a href="#" data-testid="shakes-peanut-butter-link">Peanut Butter</a></li>
+                </ul>
             </div>
-            <div class="card" data-testid="service-card">
-                <h3>Always Improving</h3>
-                <p>We test, learn, and refine — so the experience keeps getting better.</p>
+            <div class="card" data-testid="category-card-merchandise">
+                <h3>Merchandise</h3>
+                <ul class="card-links">
+                    <li><a href="#" data-testid="merch-shirts-link">Shirts</a></li>
+                    <li><a href="#" data-testid="merch-koozies-link">Koozies</a></li>
+                    <li><a href="#" data-testid="merch-misc-link">Misc</a></li>
+                </ul>
             </div>
         </div>
     </div>
 </section>
 
-<section id="contact" class="contact">
-    <div class="container">
-        <h2>Get in Touch</h2>
-        <p>Reach out and we'll get back to you shortly.</p>
-    </div>
-</section>
 {% endblock %}
