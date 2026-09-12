@@ -3,7 +3,7 @@ from django.shortcuts import render
 
 def landing(request):
     context = {
-        'store_name': 'Webstore',
-        'tagline': 'Quality tested, one commit at a time.',
+        'store_name': 'Little Apple Nutrition',
+        'tagline': '',
     }
     return render(request, 'storefront/landing.html', context)
