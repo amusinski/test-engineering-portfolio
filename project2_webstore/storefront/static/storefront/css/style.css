@@ -33,7 +33,7 @@ h1, h2, h3 {
 }
 
 a {
-    color: var(--color-primary);
+    color: var(--color-primary-dark);
     text-decoration: none;
 }
 
@@ -80,9 +80,42 @@ a {
 
 /* ---------- Hero ---------- */
 .hero {
-    background: var(--color-primary);
+    position: relative;
+    background-color: var(--color-primary-dark);
     color: #fff;
     text-align: center;
+}
+
+.hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: linear-gradient(to right, #9c0202, #f35702, #e7df02, #04ed08, #05cef1, #0511f1, #2403f7, #a205f1, #7b05a2, #ea065d);
+    clip-path: inset(0 100% 0 0);
+    animation: bg-reveal 2s ease-in-out 7.5s forwards;
+    z-index: 0;
+}
+
+.hero > * {
+    position: relative;
+    z-index: 1;
+}
+
+@keyframes bg-reveal {
+    to {
+        clip-path: inset(0 0 0 0);
+    }
+}
+
+@keyframes bg-rainbow {
+    0% {
+        background-image: linear-gradient(to right, #9c0202, #f35702, #e7df02, #04ed08, #05cef1, #0511f1, #2403f7, #a205f1, #7b05a2, #ea065d);
+        background-size: 400% auto;
+        background-position: 100% center;
+    }
+    100% {
+        background-position: 0% center;
+    }
 }
 
 .hero-image {
@@ -99,8 +132,33 @@ a {
 }
 
 .hero h1 {
-    font-size: 2.75rem;
-    margin-bottom: 0.75rem;
+    background: linear-gradient(100deg, #000 40%, #fff 50%, #000 60%);
+    background-size: 200% auto;
+    background-repeat: no-repeat;
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    animation: shine 4s ease-in-out forwards,
+               pop 3s ease-out 4.5s forwards;
+}
+
+@keyframes shine {
+    0% { background-position: 150% center; }
+    100% { background-position: -50% center; }
+}
+
+@keyframes pop {
+    0% {
+        transform: scale(4.0);
+        color: #fff;
+        -webkit-text-fill-color: #fff;
+    }
+    100% {
+        transform: scale(3.0);
+        color: #fff;
+        -webkit-text-fill-color: #fff;
+    }
 }
 
 .hero .tagline {
