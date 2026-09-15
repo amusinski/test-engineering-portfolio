@@ -57,25 +57,17 @@ a {
     padding-bottom: 1rem;
 }
 
-.brand {
-    font-family: var(--font-heading);
-    font-size: 1.4rem;
-    font-weight: bold;
+.navbar-brand {
+    font-family: 'Honk', sans-serif;
+    font-size: 3.0rem;
+    font-weight: 400;
     color: var(--color-primary-dark);
 }
 
-.site-nav {
-    display: flex;
-    gap: 1.5rem;
-}
-
-.site-nav a {
-    color: var(--color-text);
-    font-weight: 500;
-}
-
-.site-nav a:hover {
-    color: var(--color-primary);
+.nav-link {
+    font-family: 'Honk', sans-serif;
+    font-size: 2.0rem;
+    font-weight: 400;
 }
 
 /* ---------- Hero ---------- */
@@ -201,16 +193,36 @@ a {
 }
 
 .card {
-    background: var(--color-bg);
+    background-color: var(--color-bg);
     padding: 2rem;
     border-radius: var(--radius);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    position: relative;
+    overflow: hidden;
+}
+
+.card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: linear-gradient(to right, #9c0202, #f35702, #e7df02, #04ed08, #05cef1, #0511f1, #2403f7, #a205f1, #7b05a2, #ea065d);
+    clip-path: inset(0 100% 0 0);
+    animation: bg-reveal 2s ease-in-out 7.5s forwards;
+    z-index: 0;
+}
+
+.card > * {
+    position: relative;
+    z-index: 1;
 }
 
 .card h3 {
     color: var(--color-primary-dark);
     margin-bottom: 0.5rem;
     text-align:center;
+    font-family: 'Honk', sans-serif;;
+    font-size: 3.0rem;
+    font-weight: 400;
 }
 
 .card p {
