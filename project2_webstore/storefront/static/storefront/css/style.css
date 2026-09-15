@@ -107,17 +107,6 @@ a {
     }
 }
 
-@keyframes bg-rainbow {
-    0% {
-        background-image: linear-gradient(to right, #9c0202, #f35702, #e7df02, #04ed08, #05cef1, #0511f1, #2403f7, #a205f1, #7b05a2, #ea065d);
-        background-size: 400% auto;
-        background-position: 100% center;
-    }
-    100% {
-        background-position: 0% center;
-    }
-}
-
 .hero-image {
     display: block;
     width: 100%;
